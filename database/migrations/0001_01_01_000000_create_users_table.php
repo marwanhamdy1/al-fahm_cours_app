@@ -35,6 +35,8 @@ return new class extends Migration
         $table->tinyInteger('status',)->default(0);
         $table->string('mother_name')->nullable();
         $table->string('mother_identity_id')->nullable();
+        $table->float('points')->nullable();
+        $table->float('balance')->nullable();
         $table->foreign('parent_id')->references('id')->on('users')->onDelete('cascade');
         $table->timestamps();
 });

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('title');
+            $table->string('title_he');
             $table->unsignedBigInteger('course_id');
             $table->timestamps();
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');

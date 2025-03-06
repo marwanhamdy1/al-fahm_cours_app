@@ -39,7 +39,9 @@ class User extends Authenticatable implements JWTSubject
         'parent_type',
         'child_type',
         'mother_name',
-        'mother_identity_id'
+        'mother_identity_id',
+        'points',
+        'balance'
     ];
  public function children()
 {

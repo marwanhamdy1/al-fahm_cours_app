@@ -11,9 +11,11 @@ class CourseSession extends Model
 
     protected $fillable = [
         'course_id',
-        'departments_id',
-        'name',
+        'department_id',
+        'title',
+        'title_he',
         'description',
+        'description_he',
         'video'
     ];
 
@@ -21,5 +23,10 @@ class CourseSession extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+    // A CourseSession belongs to a Department
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

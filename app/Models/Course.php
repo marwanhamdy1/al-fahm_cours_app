@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Course extends Model
 {
      use HasFactory;
+    protected $table = 'courses';
 
     protected $fillable = [
         'title',
+        'title_he',
         'price',
         'earnings_point',
         'address',
+        'address_he',
+        'description',
+        'description_he',
         'start_date',
         'end_date',
         'max_people',
@@ -38,6 +43,11 @@ class Course extends Model
     {
         return $this->belongsTo(Instructor::class);
     }
+    // Relationship: A course has many course sessions
+    public function department()
+    {
+        return $this->hasMany(Department::class);
+    }
 
     // Relationship: A course has many course sessions
     public function sessions()
@@ -50,9 +60,5 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class, 'user_course_sessions', 'course_id', 'user_id');
     }
-    public function users()
-{
-    return $this->belongsToMany(User::class, 'course_user');
-}
 
 }
