@@ -41,10 +41,11 @@ class User extends Authenticatable implements JWTSubject
         'mother_name',
         'mother_identity_id'
     ];
-    public function children()
-    {
-        return $this->hasMany(User::class, 'parent_id');
-    }
+ public function children()
+{
+    return $this->hasMany(User::class, 'parent_id');
+}
+
 
     public function parent()
     {

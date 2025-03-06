@@ -44,9 +44,10 @@ class AuthController extends Controller
 }
         public function verifyCode(Request $request){
             try{
-        $user = User::where('phone_number', $request->phone_number)->where( 'verify_code', $request->verify_code)->first();
+        $user = User::where('phone_number',  $request->phone_number)
+        ->where( 'verify_code', $request->verify_code)->first();
         if(!$user){
-        return ResponseHelper::error("verify code does not match", 500);
+        return ResponseHelper::error( "verify code does not match", 500);
         }
         $token = Auth::login($user);
       // If the user has a first name and last name, return success
@@ -86,6 +87,7 @@ class AuthController extends Controller
             }
 
             $data['parent_id'] = $getParent->id;
+            unset($data['identity_id']);
         }
 
         // Update user profile
@@ -111,6 +113,17 @@ class AuthController extends Controller
             return ResponseHelper::success("available", ['available' => true]);
 
     }
+    public function myChildren()
+{
+    $children = auth()->user()->children()->get();
+
+    if ($children->isEmpty()) {
+        return ResponseHelper::error("No children found", 404);
+    }
+
+    return ResponseHelper::success("Children found", ['data' => $children]);
+}
+
     public function addChild(AddChildRequest $request)
     {
         try {
@@ -119,11 +132,13 @@ class AuthController extends Controller
             $child = User::create([
                 "first_name"    => $request->first_name,
                 "last_name"     => $request->last_name,
-                "username"     => $request->last_name,
+                "username"     => $request->username,
                 "password"      => Hash::make($request->password),
                 "phone_number"  => $request->phone_number,
                 "parent_id"     => $user->id,
+                'child_type'    => $request->child_type,
                 "color"     => $request->color,
+                "date_of_birth"     => $request->date_of_birth,
                 "image"     => $image,
                 "role"          => "child",
             ]);

@@ -10,7 +10,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify-code', [AuthController::class, 'verifyCode']); // Verify or create a user with phone number
     Route::post('/complete-profile', [AuthController::class, 'completeProfile'])->middleware('handelAuth');// Complete user profile
     Route::post('/add-child', [AuthController::class, 'addChild'])->middleware('handelAuth'); // Add a child user
-    Route::get('/checkUserName/{username}', [AuthController::class, 'checkUserName'])->middleware('handelAuth');
+    Route::get('/checkUserName/{username}', [AuthController::class, 'checkUserName']);
+    Route::get('/myChildren', [AuthController::class, 'myChildren'])->middleware('handelAuth');
 
     Route::get('/me', [AuthController::class, 'me'])->middleware('handelAuth'); // Get authenticated user details
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('handelAuth'); // Logout user
