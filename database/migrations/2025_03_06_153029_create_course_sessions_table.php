@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('video')->nullable(); // Example: ""
             $table->timestamps();
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
-            $table->foreign('departments_id')->references('id')->on('departments')->onDelete('cascade');
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
         });
     }
 

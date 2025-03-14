@@ -13,6 +13,7 @@ class Course extends Model
         'title',
         'title_he',
         'price',
+        'image',
         'earnings_point',
         'address',
         'address_he',

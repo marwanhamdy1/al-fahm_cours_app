@@ -154,16 +154,16 @@ class AuthController extends Controller
     try {
         // Validate request
         $request->validate([
-            'phone_number' => 'required|string|exists:users,phone_number',
+            'username' => 'required|string|exists:users,username',
             'password'     => 'required|string|min:6',
         ]);
 
         // Find user by phone number
-        $user = User::where('phone_number', $request->phone_number)->first();
+        $user = User::where('username', $request->username)->first();
 
         // Check if the password is correct
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return ResponseHelper::error("Invalid phone number or password", 401);
+            return ResponseHelper::error("Invalid username or password", 401);
         }
 
         // Generate a new token for the user

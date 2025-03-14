@@ -14,8 +14,13 @@ class EnrolledCourse extends Model
     protected $fillable = [
         'user_id',
         'course_id',
+        'assigned_by',
         'status',
+        'amount_paid',
+        'remaining_amount',
+        'payment_status',
     ];
+
 
     protected $casts = [
         'status' => 'string',
@@ -28,12 +33,25 @@ class EnrolledCourse extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+     public function assignedBy()
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
     /**
      * Get the course that belongs to this enrollment.
      */
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function isFullyPaid()
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    public function calculateRemainingAmount()
+    {
+        return $this->remaining_amount;
     }
 }

@@ -34,6 +34,7 @@ return new class extends Migration
             $table->enum('type',['offline','online'])->default('offline'); // Total sessions
             $table->string('tags',500)->nullable(); // Total sessions
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('instructor_id')->references('id')->on('instructors')->onDelete('cascade');
         });

@@ -4,7 +4,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\course\ViewCourse;
-
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\InstructorController;
+use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\CourseSessionController;
+use App\Http\Controllers\Api\CourseController;
+use App\Http\Controllers\course\EnrolledCourseController;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']); // Verify or create a user with phone number
     Route::post('/phone-number', [AuthController::class, 'phoneNumber']); // Verify or create a user with phone number
@@ -19,4 +24,46 @@ Route::prefix('auth')->group(function () {
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('handelAuth'); // Refresh token
 });
 Route::get('/course', [ViewCourse::class, 'index']);
+Route::get('/course/{id}', [ViewCourse::class, 'show']);
+Route::get('/course/category/{id}', [ViewCourse::class, 'indexByCategory']);
 Route::get('/departmentAndSessions/{id}', [ViewCourse::class, 'departmentAndSessions']);
+// enroll
+Route::post('/course/store', [EnrolledCourseController::class, 'store']);
+Route::get('/course/enroll', [EnrolledCourseController::class, 'enrolledToPending']);
+Route::post('/course/assignCourse', [EnrolledCourseController::class, 'assignCourse']);
+Route::get('/course/getMyCourses', [EnrolledCourseController::class, 'getMyCourses']);
+
+// MARK:- DashBoard
+// Category Routes
+Route::post('/categories', [CategoryController::class, 'store']);
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
+Route::post('/categories-update/{category}', [CategoryController::class, 'update']);
+Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
+// Instructor Routes
+Route::post('/instructors', [InstructorController::class, 'store']);
+Route::get('/instructors', [InstructorController::class, 'index']);
+Route::get('/instructors/{instructor}', [InstructorController::class, 'show']);
+Route::post('/instructors/{instructor}', [InstructorController::class, 'update']);
+Route::delete('/instructors/{instructor}', [InstructorController::class, 'destroy']);
+
+// Department Routes
+Route::post('/departments', [DepartmentController::class, 'store']);
+Route::get('/departments/{id}', [DepartmentController::class, 'index']);
+Route::post('/departments/{department}', [DepartmentController::class, 'update']);
+Route::delete('/departments/{department}', [DepartmentController::class, 'destroy']);
+
+// Course Session Routes
+Route::post('/course-sessions', [CourseSessionController::class, 'store']);
+Route::get('/course-sessions', [CourseSessionController::class, 'index']);
+Route::get('/course-sessions/{courseSession}', [CourseSessionController::class, 'show']);
+Route::put('/course-sessions/{courseSession}', [CourseSessionController::class, 'update']);
+Route::delete('/course-sessions/{courseSession}', [CourseSessionController::class, 'destroy']);
+
+// Course Routes
+Route::post('/courses-add', [CourseController::class, 'store']);
+Route::get('/courses', [CourseController::class, 'index']);
+Route::get('/courses/{course}', [CourseController::class, 'show']);
+Route::put('/courses/{course}', [CourseController::class, 'update']);
+Route::delete('/courses/{course}', [CourseController::class, 'destroy']);

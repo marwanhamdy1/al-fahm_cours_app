@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name_he'); // Hebrew name
             $table->string('image'); // image
             $table->text('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('date_of_birth');
             $table->string('bio',5000)->nullable();
             $table->text('info')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
