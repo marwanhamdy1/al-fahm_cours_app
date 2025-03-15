@@ -20,6 +20,10 @@ class EnrolledCourseController extends Controller
    public function store(StoreEnrolledCourseRequest $request)
     {
         try {
+            $valid = EnrolledCourse::where('user_id', auth()->user()->id)->where("course_id", $request->course_id)->first();
+            if ($valid) {
+                return ResponseHelper::error("لقد تم التسجيل في هذه الدورة من قبل", 400);
+            }
             EnrolledCourse::create([
                 "user_id"          => auth()->user()->id,
                 "course_id"        => $request->course_id,
@@ -85,7 +89,7 @@ class EnrolledCourseController extends Controller
           return $enrolledCourse;
         });
             return ResponseHelper::success("success", EnrolledCourseResource::collection($data));
-} catch (Exception $e) {
+        } catch (Exception $e) {
             return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
         }
     }
