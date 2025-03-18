@@ -25,6 +25,7 @@ class StoreEnrolledCourseRequest extends FormRequest
         return [
             'course_id'      => 'required|exists:courses,id', // يجب أن يكون الكورس موجودًا
             'assigned_by'    => 'nullable|exists:users,id', // إذا كان الأب هو من يسجل ابنه
+            'child_id'    => 'nullable|exists:users,id',
             'amount_paid'    => 'nullable|numeric|min:0',
             'remaining_amount' => 'nullable|numeric|min:0',
             'payment_status' => 'nullable|in:unpaid,partially_paid,paid',

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\course\EnrolledCourseController;
+use App\Http\Controllers\favorite\FavoriteController;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']); // Verify or create a user with phone number
     Route::post('/phone-number', [AuthController::class, 'phoneNumber']); // Verify or create a user with phone number
@@ -28,11 +29,13 @@ Route::get('/course/{id}', [ViewCourse::class, 'show']);
 Route::get('/course/category/{id}', [ViewCourse::class, 'indexByCategory']);
 Route::get('/departmentAndSessions/{id}', [ViewCourse::class, 'departmentAndSessions']);
 // enroll
-Route::post('/course/store', [EnrolledCourseController::class, 'store']);
-Route::get('/course/enroll', [EnrolledCourseController::class, 'enrolledToPending']);
-Route::post('/course/assignCourse', [EnrolledCourseController::class, 'assignCourse']);
-Route::get('/course/getMyCourses', [EnrolledCourseController::class, 'getMyCourses']);
-
+Route::post('/course/store', [EnrolledCourseController::class, 'store'])->middleware('handelAuth'); // Refresh token;
+Route::get('/course/enroll/toPending', [EnrolledCourseController::class, 'enrolledToPending'])->middleware('handelAuth'); // Refresh token;
+Route::post('/course/assignCourse', [EnrolledCourseController::class, 'assignCourse'])->middleware('handelAuth'); // Refresh token;
+Route::get('/course/get/courses', [EnrolledCourseController::class, 'getMyCourses'])->middleware('handelAuth'); // Refresh token;
+    Route::get('/favorites', [FavoriteController::class, 'index'])->middleware('handelAuth');;
+    Route::post('/favorites', [FavoriteController::class, 'store'])->middleware('handelAuth');;
+    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->middleware('handelAuth');;
 // MARK:- DashBoard
 // Category Routes
 Route::post('/categories', [CategoryController::class, 'store']);
