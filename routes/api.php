@@ -11,6 +11,10 @@ use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\course\EnrolledCourseController;
 use App\Http\Controllers\favorite\FavoriteController;
+
+    Route::get('/image', [AuthController::class, 'image']); // Verify or create a user with phone number
+
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']); // Verify or create a user with phone number
     Route::post('/phone-number', [AuthController::class, 'phoneNumber']); // Verify or create a user with phone number

@@ -23,6 +23,7 @@ class CourseResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'max_people' => $this->max_people,
+            'image' => asset('/storage/'.$this->image),
             // 'signed_people' => $this->signed_people,
             'age_range' => $this->age_range,
             'session_count' => $this->session_count,

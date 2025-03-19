@@ -220,4 +220,14 @@ class AuthController extends Controller
             return ResponseHelper::error("Failed to generate token response", 500, $e->getMessage());
         }
     }
+   public function image()
+{
+    $images = [
+        asset('storage/images/person1.png'),
+        asset('storage/images/person2.png'),
+        asset('storage/images/person3.png')
+    ];
+
+    return ResponseHelper::success("success", ['data' => $images]);
+}
 }
