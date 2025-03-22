@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\course\EnrolledCourseController;
+use App\Http\Controllers\course\RatingController;
 use App\Http\Controllers\favorite\FavoriteController;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -36,13 +37,16 @@ Route::get('/course/category/{id}', [ViewCourse::class, 'indexByCategory']);
 Route::get('/departmentAndSessions/{id}', [ViewCourse::class, 'departmentAndSessions']);
 // enroll
 Route::post('/course', [EnrolledCourseController::class, 'store'])->middleware('handelAuth'); // Refresh token;
-Route::get('/course/enroll', [EnrolledCourseController::class, 'enrolledToPending'])->middleware('handelAuth'); // Refresh token;
+Route::get('/course/enroll/toPending', [EnrolledCourseController::class, 'enrolledToPending'])->middleware('handelAuth'); // Refresh token;
 Route::post('/course/assignCourse', [EnrolledCourseController::class, 'assignCourse'])->middleware('handelAuth'); // Refresh token;
 Route::get('/course/get/courses', [EnrolledCourseController::class, 'getMyCourses'])->middleware('handelAuth'); // Refresh token;
 // fav
 Route::get('/favorites', [FavoriteController::class, 'index'])->middleware('handelAuth');;
 Route::post('/favorites', [FavoriteController::class, 'store'])->middleware('handelAuth');;
-Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->middleware('handelAuth');;
+Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->middleware('handelAuth');
+//rate
+Route::get('/rating/{id}', [RatingController::class, 'index'])->middleware('handelAuth');;
+Route::post('/rating', [RatingController::class, 'store'])->middleware('handelAuth');;
 // MARK:- DashBoard
 // Category Routes
 Route::post('/categories', [CategoryController::class, 'store']);

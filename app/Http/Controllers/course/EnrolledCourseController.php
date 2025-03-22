@@ -73,7 +73,7 @@ class EnrolledCourseController extends Controller
     public function getMyCourses(GetMyCourseRequest $request) {
         try{
         $queryUserId = $this->checkChildAndPermission($request);
-        $data = EnrolledCourse::where('assigned_by',$queryUserId)
+        $data = EnrolledCourse::orWhere('assigned_by',$queryUserId)
         ->orWhere("user_id", $queryUserId)->get();
         $data->transform(function ($enrolledCourse) {
             $course = $enrolledCourse->course;

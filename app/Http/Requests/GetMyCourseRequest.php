@@ -24,6 +24,7 @@ class GetMyCourseRequest extends FormRequest
     {
         return [
             'child_id'    => 'nullable|exists:users,id',
+            'status'    => 'nullable|in:on_basket,pending,approved',
         ];
     }
 

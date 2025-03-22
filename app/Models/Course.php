@@ -29,6 +29,8 @@ class Course extends Model
         'instructor_id',
         'active',
         'type',
+        'rating_count',
+        'rating_sum'
     ];
 
     protected $dates = ['start_date', 'end_date'];
@@ -60,6 +62,10 @@ class Course extends Model
     public function usersSessions()
     {
         return $this->belongsToMany(User::class, 'user_course_sessions', 'course_id', 'user_id');
+    }
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
     }
 
 }

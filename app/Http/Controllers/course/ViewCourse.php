@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Models\Course;
+use App\Models\UserCourseSession;
 use App\Models\Department;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\DepartmentResource;
@@ -50,13 +51,39 @@ class ViewCourse extends Controller
                 return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
             }
         }
-    public function departmentAndSessions($id){
-        try {
-            $data = Department::where('course_id', $id)->with(['courseSessions'])->get();
-            return ResponseHelper::success("success", DepartmentResource::collection($data));
-        } catch (Exception $e) {
-            return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
-        }
+    public function departmentAndSessions($id)
+{
+    try {
+        $attendedSessionIds = UserCourseSession::where('user_id', auth()->user()->id)
+            ->pluck('course_session_id')
+            ->toArray();
+
+        $departments = Department::where('course_id', $id)
+            ->with(['courseSessions'])
+            ->get();
+
+        // Manually format the response
+        $formattedDepartments = $departments->map(function ($department) use ($attendedSessionIds) {
+            return [
+                'id' => $department->id,
+                'title' => $department->title,
+                'session' => $department->courseSessions->map(function ($session) use ($attendedSessionIds) {
+                    return [
+                        'id' => $session->id,
+                        'title' => $session->title,
+                        'description' => $session->description,
+                        'attends' => in_array($session->id, $attendedSessionIds) ? 1 : 0
+                    ];
+                }),
+            ];
+        });
+
+        return ResponseHelper::success("success", $formattedDepartments
+        );
+    } catch (Exception $e) {
+        return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
     }
+}
+
 
 }
