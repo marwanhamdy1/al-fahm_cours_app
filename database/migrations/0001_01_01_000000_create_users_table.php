@@ -23,7 +23,7 @@ return new class extends Migration
         $table->string('image')->nullable();
         $table->string('color')->nullable();
         $table->string('verify_code')->default("1234");
-        $table->enum('role', ['parent', 'child', 'individual'])->nullable();
+        $table->enum('role', ['super_admin','admin','parent', 'child', 'individual'])->nullable();
         $table->date('date_of_birth')->nullable();
         $table->string('school_name')->nullable();
         $table->string('grade_name')->nullable();

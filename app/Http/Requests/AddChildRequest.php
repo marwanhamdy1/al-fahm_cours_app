@@ -31,8 +31,8 @@ class AddChildRequest extends FormRequest
             'password'      => 'required|string|min:6|confirmed', // Uses password confirmation
             'phone_number'  => 'nullable|string|regex:/^\+?[0-9]{7,15}$/|unique:users,phone_number',
             'child_type'    => 'required|string|in:male,female', // Add other roles if needed
-            'color'         =>"required|string|max:255",
-            'image'         => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240', // 10MB limit
+            'color'         => "required|string|max:255",
+            'image'         => 'required|string|max:255',
             'date_of_birth' => 'required|date',
         ];
     }

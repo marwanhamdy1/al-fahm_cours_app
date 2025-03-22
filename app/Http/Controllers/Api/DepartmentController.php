@@ -5,14 +5,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use App\Http\Resources\DepartmentResource;
-
+use App\Helpers\ResponseHelper;
 class DepartmentController extends Controller
 {
     public function index($id)
     {
         $data = Department::where('course_id', $id)->with(['courseSessions'])->get();
 
-        return response()->json( DepartmentResource::collection($data), 200);
+        return ResponseHelper::success('success',DepartmentResource::collection($data), 200);
+
     }
 
     public function store(Request $request)
@@ -30,7 +31,7 @@ class DepartmentController extends Controller
 
     public function show(Department $department)
     {
-        return response()->json($department, 200);
+        return ResponseHelper::success('success',new DepartmentResource($department), 200);
     }
 
     public function update(Request $request, Department $department)

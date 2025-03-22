@@ -12,6 +12,9 @@ use App\Http\Requests\PhoneNumberRequest;
 use App\Http\Requests\AddChildRequest;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\ImageUploadTrait;
+use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 use Exception;
 
 class AuthController extends Controller
@@ -128,7 +131,7 @@ class AuthController extends Controller
     {
         try {
             $user = auth()->user();
-            $image = $this->saveImage($request->image);
+            // $image = $this->saveImage($request->image);
             $child = User::create([
                 "first_name"    => $request->first_name,
                 "last_name"     => $request->last_name,
@@ -139,7 +142,7 @@ class AuthController extends Controller
                 'child_type'    => $request->child_type,
                 "color"     => $request->color,
                 "date_of_birth"     => $request->date_of_birth,
-                "image"     => $image,
+                "image"     => $request->image,
                 "role"          => "child",
             ]);
 
@@ -219,6 +222,42 @@ class AuthController extends Controller
         } catch (Exception $e) {
             return ResponseHelper::error("Failed to generate token response", 500, $e->getMessage());
         }
+    }
+    // trash will
+     public function loginAdminTrash(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Get user by email
+        $user = User::where('email', $request->email)->first();
+
+        // Check if user exists and is an admin/super_admin
+        if (!$user || !in_array($user->role, ['admin', 'super_admin'])) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Verify password
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
+        }
+
+        // Generate JWT token
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => $user,
+            'role' => $user->role,
+        ]);
     }
    public function image()
 {

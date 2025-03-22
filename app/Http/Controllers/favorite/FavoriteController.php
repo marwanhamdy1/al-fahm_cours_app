@@ -75,6 +75,9 @@ class FavoriteController extends Controller
     {
         $userId = auth()->user()->id;
         $queryUserId = $request->has('child_id') ? $request->child_id : $userId;
+         if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+            return $queryUserId;
+        }
 
         if ($request->has('child_id') && !auth()->user()->children()->where('id', $queryUserId)->exists()) {
             throw new Exception("ليس لديك صلاحية لتسجيل هذا الطفل");

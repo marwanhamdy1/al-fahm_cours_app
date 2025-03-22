@@ -11,11 +11,13 @@ use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\course\EnrolledCourseController;
 use App\Http\Controllers\favorite\FavoriteController;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
     Route::get('/image', [AuthController::class, 'image']); // Verify or create a user with phone number
 
 
 Route::prefix('auth')->group(function () {
+    Route::post('/loginAdmin', [AuthController::class, 'loginAdminTrash']); // Verify or create a user with phone number
     Route::post('/login', [AuthController::class, 'login']); // Verify or create a user with phone number
     Route::post('/phone-number', [AuthController::class, 'phoneNumber']); // Verify or create a user with phone number
     Route::post('/verify-code', [AuthController::class, 'verifyCode']); // Verify or create a user with phone number
@@ -33,13 +35,14 @@ Route::get('/course/{id}', [ViewCourse::class, 'show']);
 Route::get('/course/category/{id}', [ViewCourse::class, 'indexByCategory']);
 Route::get('/departmentAndSessions/{id}', [ViewCourse::class, 'departmentAndSessions']);
 // enroll
-Route::post('/course/store', [EnrolledCourseController::class, 'store'])->middleware('handelAuth'); // Refresh token;
-Route::get('/course/enroll/toPending', [EnrolledCourseController::class, 'enrolledToPending'])->middleware('handelAuth'); // Refresh token;
+Route::post('/course', [EnrolledCourseController::class, 'store'])->middleware('handelAuth'); // Refresh token;
+Route::get('/course/enroll', [EnrolledCourseController::class, 'enrolledToPending'])->middleware('handelAuth'); // Refresh token;
 Route::post('/course/assignCourse', [EnrolledCourseController::class, 'assignCourse'])->middleware('handelAuth'); // Refresh token;
 Route::get('/course/get/courses', [EnrolledCourseController::class, 'getMyCourses'])->middleware('handelAuth'); // Refresh token;
-    Route::get('/favorites', [FavoriteController::class, 'index'])->middleware('handelAuth');;
-    Route::post('/favorites', [FavoriteController::class, 'store'])->middleware('handelAuth');;
-    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->middleware('handelAuth');;
+// fav
+Route::get('/favorites', [FavoriteController::class, 'index'])->middleware('handelAuth');;
+Route::post('/favorites', [FavoriteController::class, 'store'])->middleware('handelAuth');;
+Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->middleware('handelAuth');;
 // MARK:- DashBoard
 // Category Routes
 Route::post('/categories', [CategoryController::class, 'store']);
@@ -74,3 +77,21 @@ Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses/{course}', [CourseController::class, 'show']);
 Route::put('/courses/{course}', [CourseController::class, 'update']);
 Route::delete('/courses/{course}', [CourseController::class, 'destroy']);
+//
+
+Route::get('/createAdmin', function () {
+    $user = User::updateOrCreate(
+        ['email' => 'admin@bemo.com'], // Check if an account with this email exists
+        [
+            'first_name' => 'Bemo ',
+            'last_name' => ' Admin',
+            'password' => Hash::make('bemomaroo'),
+            'role' => 'admin', // Change to 'super_admin' if needed
+        ]
+    );
+
+    return response()->json([
+        'message' => 'Admin account created successfully',
+        'user' => $user
+    ]);
+});

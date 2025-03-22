@@ -5,13 +5,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
 use App\Traits\ImageUploadTrait;
+use App\Helpers\ResponseHelper;
 
 class InstructorController extends Controller
 {
     use ImageUploadTrait;
     public function index()
     {
-        return response()->json(Instructor::all(), 200);
+        return ResponseHelper::success('success',Instructor::all(), 200);
     }
 
     public function store(Request $request)
@@ -40,7 +41,7 @@ class InstructorController extends Controller
 
     public function show(Instructor $instructor)
     {
-        return response()->json($instructor, 200);
+        return ResponseHelper::success('success',$instructor, 200);
     }
 
     public function update(Request $request, Instructor $instructor)

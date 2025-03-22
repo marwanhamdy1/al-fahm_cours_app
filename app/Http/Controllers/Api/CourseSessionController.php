@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CourseSession;
 use Illuminate\Http\Request;
-
+use App\Helpers\ResponseHelper;
 class CourseSessionController extends Controller
 {
     public function index()
     {
-        return response()->json(CourseSession::all(), 200);
+        return ResponseHelper::success('success',CourseSession::all(), 200);
     }
 
     public function store(Request $request)
@@ -33,7 +33,7 @@ class CourseSessionController extends Controller
 
     public function show(CourseSession $courseSession)
     {
-        return response()->json($courseSession, 200);
+        return ResponseHelper::success('success',$courseSession, 200);
     }
 
     public function update(Request $request, CourseSession $courseSession)

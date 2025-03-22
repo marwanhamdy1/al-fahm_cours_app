@@ -107,6 +107,10 @@ class EnrolledCourseController extends Controller
         $user = auth()->user();
         $userId = $user->id;
         $queryUserId = $request->has('child_id') ? $request->child_id : $userId;
+        // Skip the check if the user is a super_admin or admin
+        if (in_array($user->role, ['super_admin', 'admin'])) {
+            return $queryUserId;
+        }
 
         if ($request->has('child_id') && !$user->children()->where('id', $queryUserId)->exists()) {
             throw new Exception("ليس لديك صلاحية لتسجيل هذا الطفل", 403);

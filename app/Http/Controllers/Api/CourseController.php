@@ -6,13 +6,15 @@ use App\Models\Course;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCourseRequest;
 use App\Traits\ImageUploadTrait;
+use App\Helpers\ResponseHelper;
+
 
 class CourseController extends Controller
 {
     use ImageUploadTrait;
     public function index()
     {
-        return response()->json(Course::all(), 200);
+        return ResponseHelper::success('success',Course::all(), 200);
     }
 
    public function store(StoreCourseRequest $request)
@@ -40,7 +42,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        return response()->json($course, 200);
+    return ResponseHelper::success('success',$course, 200);
     }
 
     public function update(Request $request, Course $course)
