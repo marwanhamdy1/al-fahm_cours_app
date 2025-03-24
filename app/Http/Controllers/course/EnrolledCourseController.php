@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\EnrolledCourse;
+use App\Models\Course;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\StoreEnrolledCourseRequest;
 use App\Http\Requests\GetMyCourseRequest;
@@ -20,6 +21,10 @@ class EnrolledCourseController extends Controller
    public function store(StoreEnrolledCourseRequest $request)
     {
         try {
+            $course = Course::find($request->course_id);
+            if(!$course){
+            return ResponseHelper::error("course not found" , 400);
+            }
             $queryUserId = $this->checkChildAndPermission($request);
             $valid = EnrolledCourse::where('user_id', $queryUserId)->where("course_id", $request->course_id)->first();
             if ($valid) {
@@ -28,24 +33,66 @@ class EnrolledCourseController extends Controller
             EnrolledCourse::create([
                 "user_id"          => $queryUserId,
                 "course_id"        => $request->course_id,
+                "remaining_amount" => $course->price
             ]);
+
             return ResponseHelper::success("تم التسجيل بنجاح");
         } catch (Exception $e) {
             return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
         }
     }
-    public function enrolledToPending(Request $request) {
-    try {
-            $queryUserId = $this->checkChildAndPermission($request);
-        $updated = EnrolledCourse::where('user_id', $queryUserId)->where("status", "on_basket")
-            ->update(['status' => "pending"]); // Update all matching records
+        public function destroy($id)
+    {
+        try {
+            $course = EnrolledCourse::findOrFail($id); // Throws ModelNotFoundException if not found
+            $course->delete();
 
-        if (!$updated) {
+            return ResponseHelper::success("تم حذف الدورة");
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return ResponseHelper::error("لم يتم العثور على دورة", 404);
+
+        } catch (Exception $e) {
+            return ResponseHelper::error("حدث خطأ أثناء محاولة حذف الدورة: " . $e->getMessage(), 500);
+        }
+    }
+    private function updateCourseAndEnrolled($enrolledCourseId) {
+        try {
+
+        } catch (Exception $e) {
+            return ResponseHelper::error("حدث خطاء" . $e->getMessage(), 500);
+        }
+    }
+    public function enrolledToPending(Request $request)
+{
+    try {
+        $queryUserId = $this->checkChildAndPermission($request);
+
+        // 1. Get all enrolled courses in the basket
+        $enrolledCourses = EnrolledCourse::where('user_id', $queryUserId)
+            ->where("status", "on_basket")
+            ->with('course') // Eager load the course relationship (if defined)
+            ->get();
+
+        if ($enrolledCourses->isEmpty()) {
             return ResponseHelper::error("لم يتم العثور على دورات مسجلة", 404);
         }
 
+        // 2. Increment signed_people for each related course
+        foreach ($enrolledCourses as $enrolledCourse) {
+            if ($enrolledCourse->course) { // Check if course exists
+                $enrolledCourse->course->increment('signed_people'); // +1
+            }
+        }
+
+        // 3. Update all matching records to "pending"
+        $updatedCount = EnrolledCourse::where('user_id', $queryUserId)
+            ->where("status", "on_basket")
+            ->update(['status' => "pending"]);
+
         return ResponseHelper::success("تم تحديث الحالة لجميع الدورات المسجلة");
-    } catch (Exception $e) {
+
+    } catch (\Exception $e) {
         return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
     }
 }

@@ -21,7 +21,7 @@ class ViewCourse extends Controller
             try {
 
                 // DB::enableQueryLog();
-                $data = Course::with(['instructor'])->get();
+                $data = Course::with(['instructor' ,'category'])->get();
                 // $queries = DB::getQueryLog();
                 // $queryCount = count($queries);
 
@@ -32,11 +32,11 @@ class ViewCourse extends Controller
         }
         public function show($id){
             try{
-        $data = Course::find($id)->with(['instructor'])->get();
+                 $data = Course::find($id)->with(['instructor',  ,'category'])->get();
                 return ResponseHelper::success("success", CourseResource::collection($data));
- } catch (Exception $e) {
-                return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
-            }
+                } catch (Exception $e) {
+                    return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
+                }
         }
         public function indexByCategory($id){
                try {

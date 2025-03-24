@@ -17,6 +17,7 @@ class CourseResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'description' => $this->description,
             'price' => $this->price,
             'earnings_point' => $this->earnings_point,
             'address' => $this->address,
@@ -30,6 +31,8 @@ class CourseResource extends JsonResource
             'instructor' => $this->instructor,
             'active' => $this->active,
             'type' => $this->type,
+            'category' => new CategoryResources($this->category),
+            'rate_avg' => $this->rating_count / $this->rating_sum
         ];
     }
 }
