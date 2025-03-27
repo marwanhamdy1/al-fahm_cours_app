@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\course\ViewCourse;
+use App\Http\Controllers\Api\UsersController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\InstructorController;
 use App\Http\Controllers\Api\DepartmentController;
@@ -37,6 +38,7 @@ Route::get('/course/category/{id}', [ViewCourse::class, 'indexByCategory']);
 Route::get('/departmentAndSessions/{id}', [ViewCourse::class, 'departmentAndSessions']);
 // enroll
 Route::post('/course', [EnrolledCourseController::class, 'store'])->middleware('handelAuth'); // Refresh token;
+Route::get('/course/destroy/{id}', [EnrolledCourseController::class, 'destroy'])->middleware('handelAuth'); // Refresh token;
 Route::get('/course/enroll/toPending', [EnrolledCourseController::class, 'enrolledToPending'])->middleware('handelAuth'); // Refresh token;
 Route::post('/course/assignCourse', [EnrolledCourseController::class, 'assignCourse'])->middleware('handelAuth'); // Refresh token;
 Route::get('/course/get/courses', [EnrolledCourseController::class, 'getMyCourses'])->middleware('handelAuth'); // Refresh token;
@@ -81,7 +83,12 @@ Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses/{course}', [CourseController::class, 'show']);
 Route::put('/courses/{course}', [CourseController::class, 'update']);
 Route::delete('/courses/{course}', [CourseController::class, 'destroy']);
-//
+//users
+Route::get('/users/info', [UsersController::class, 'getUsers']);
+Route::get('/users/info/parent', [UsersController::class, 'getParents']);
+Route::get('/users/info/parent/{id}/children', [UsersController::class, 'getChildrenParent']);
+Route::post('/users/updateUserInfo/{id}', [UsersController::class, 'updateUserInfo']);
+
 
 Route::get('/createAdmin', function () {
     $user = User::updateOrCreate(

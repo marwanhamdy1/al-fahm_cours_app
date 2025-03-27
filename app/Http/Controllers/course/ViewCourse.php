@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\course;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Models\Course;
 use App\Models\UserCourseSession;
 use App\Models\Department;
 use App\Http\Resources\CourseResource;
-use App\Http\Resources\DepartmentResource;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -32,8 +30,8 @@ class ViewCourse extends Controller
         }
         public function show($id){
             try{
-                 $data = Course::find($id)->with(['instructor',  ,'category'])->get();
-                return ResponseHelper::success("success", CourseResource::collection($data));
+                 $data = Course::find($id)->with(['instructor','category'])->get();
+                return ResponseHelper::success("success",  CourseResource::collection($data));
                 } catch (Exception $e) {
                     return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
                 }

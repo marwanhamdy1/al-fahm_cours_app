@@ -43,15 +43,18 @@ class User extends Authenticatable implements JWTSubject
         'points',
         'balance'
     ];
- public function children()
-{
-    return $this->hasMany(User::class, 'parent_id');
-}
+    public function children()
+    {
+        return $this->hasMany(User::class, 'parent_id');
+    }
 
 
     public function parent()
     {
         return $this->belongsTo(User::class, 'parent_id');
+    }
+    public function enrolledCourses(){
+        return $this->hasMany(EnrolledCourse::class);
     }
     /**
      * The attributes that should be hidden for serialization.

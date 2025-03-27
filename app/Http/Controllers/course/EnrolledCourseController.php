@@ -45,6 +45,9 @@ class EnrolledCourseController extends Controller
     {
         try {
             $course = EnrolledCourse::findOrFail($id); // Throws ModelNotFoundException if not found
+            if($course->status != "on_basket" || $course->user_id != auth()->user()->id){
+            return ResponseHelper::error("لم يتم العثور على دورة", 404);
+            }
             $course->delete();
 
             return ResponseHelper::success("تم حذف الدورة");
