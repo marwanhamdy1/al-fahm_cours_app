@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\course\ViewCourse;
 use App\Http\Controllers\Api\UsersController;
 use App\Http\Controllers\Api\CategoryController;
@@ -31,6 +32,11 @@ Route::prefix('auth')->group(function () {
     Route::get('/me', [AuthController::class, 'me'])->middleware('handelAuth'); // Get authenticated user details
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('handelAuth'); // Logout user
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('handelAuth'); // Refresh token
+    // update
+    Route::post('/user/update', [UserController::class, 'update'])->middleware('handelAuth'); // Refresh token
+    Route::post('/user/changePassword', [UserController::class, 'changePassword'])->middleware('handelAuth'); // Refresh token
+    Route::post('/user/updateImage', [UserController::class, 'updateImage'])->middleware('handelAuth'); // Refresh token
+
 });
 Route::get('/course', [ViewCourse::class, 'index']);
 Route::get('/course/{id}', [ViewCourse::class, 'show']);

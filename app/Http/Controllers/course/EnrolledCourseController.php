@@ -121,31 +121,49 @@ class EnrolledCourseController extends Controller
         }
     }
     public function getMyCourses(GetMyCourseRequest $request) {
-        try{
+    try {
         $queryUserId = $this->checkChildAndPermission($request);
-        $data = EnrolledCourse::orWhere('assigned_by',$queryUserId)
-        ->orWhere("user_id", $queryUserId)->get();
+        // Get the status filter from the request (if provided)
+        $status = $request->input('status'); // Single status (e.g., 'pending')
+        $statuses = $request->input('statuses', []); // Array of statuses (e.g., ['pending', 'approved'])
+
+        // Start building the query
+        $query = EnrolledCourse::where(function($q) use ($queryUserId) {
+            $q->where('assigned_by', $queryUserId)
+              ->orWhere("user_id", $queryUserId);
+        });
+
+        // Apply status filter if provided
+        if ($status) {
+            $query->where('status', $status); // Filter by single status
+        } elseif (!empty($statuses)) {
+            $query->whereIn('status', $statuses); // Filter by multiple statuses
+        }
+
+        $data = $query->get();
+
         $data->transform(function ($enrolledCourse) {
             $course = $enrolledCourse->course;
             if ($course) {
-            $attendedSessions = UserCourseSession::where('user_id', auth()->user()->id)
-                ->where('course_session_id', $course->id)
-                ->count();
+                $attendedSessions = UserCourseSession::where('user_id', auth()->user()->id)
+                    ->where('course_session_id', $course->id)
+                    ->count();
 
-            // Avoid division by zero
-            $attendancePercentage =$course->session_count > 0
-                ? round(($attendedSessions / $course->session_count) * 100, 2)
-                : 0;
+                // Avoid division by zero
+                $attendancePercentage = $course->session_count > 0
+                    ? round(($attendedSessions / $course->session_count) * 100, 2)
+                    : 0;
 
-            $enrolledCourse->attendance_percentage = $attendancePercentage;
-        }
-          return $enrolledCourse;
+                $enrolledCourse->attendance_percentage = $attendancePercentage;
+            }
+            return $enrolledCourse;
         });
-            return ResponseHelper::success("success", EnrolledCourseResource::collection($data));
-        } catch (Exception $e) {
-            return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
-        }
+
+        return ResponseHelper::success("success", EnrolledCourseResource::collection($data));
+    } catch (Exception $e) {
+        return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
     }
+}
      /**
      * Check if the authenticated user has permission to access child data
      *

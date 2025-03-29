@@ -4,6 +4,7 @@ namespace App\Http\Controllers\course;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\ResponseHelper;
+use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\UserCourseSession;
 use App\Models\Department;
@@ -14,12 +15,26 @@ use Illuminate\Support\Facades\DB;
 class ViewCourse extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
         {
             try {
 
                 // DB::enableQueryLog();
-                $data = Course::with(['instructor' ,'category'])->get();
+                 $query = Course::with(['instructor', 'category']);
+
+                if ($request->has('search')) {
+                    if($this->detectLanguage($request->input('search')) == 'he'){
+                        $search = $request->input('search');
+                        $query->where("title_he", 'LIKE', "%{$search}%")
+                        ->orWhere("description_he", 'LIKE', "%{$search}%");
+                    }else{
+                        $search = $request->input('search');
+                        $query->where("title", 'LIKE', "%{$search}%")
+                        ->orWhere("description", 'LIKE', "%{$search}%");
+                    }
+                }
+
+                $data = $query->get();
                 // $queries = DB::getQueryLog();
                 // $queryCount = count($queries);
 
@@ -82,6 +97,9 @@ class ViewCourse extends Controller
         return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
     }
 }
-
+        function detectLanguage($text)
+        {
+            return preg_match('/\p{Hebrew}/u', $text) ? 'he' : 'ar';
+        }
 
 }
