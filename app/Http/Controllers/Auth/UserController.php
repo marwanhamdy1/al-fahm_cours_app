@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\PointHistory;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\UserUpdateRequest;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\ImageUploadTrait;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Resources\PointHistoryResources;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -77,6 +78,27 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return ResponseHelper::error("Failed to update image: " . $e->getMessage(), 500);
         }
+    }
+    public function getMyPoints(){
+        $point = PointHistory::where('user_id', auth()->user()->id)->get();
+        return ResponseHelper::success("success", PointHistoryResources::collection($point));
+    }
+    public function AddPointsTest($point){
+        // Create a new PointHistory record
+        $pointHistory = PointHistory::create([
+            'user_id' => auth()->user()->id,
+            'points' => $point,
+            'description' => "for test bro only",
+        ]);
+
+        // Retrieve the authenticated user
+        $user = auth()->user();
+
+        // Add the points from the created PointHistory record
+        $user->points = $user->points + $pointHistory->points;
+        $user->save(); // Don't forget to save the updated user points
+
+        return ResponseHelper::success("success", new PointHistoryResources($pointHistory));
     }
 
 }

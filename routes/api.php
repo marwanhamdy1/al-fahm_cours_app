@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\course\EnrolledCourseController;
 use App\Http\Controllers\course\RatingController;
+use App\Http\Controllers\course\InstructorRatingController;
 use App\Http\Controllers\favorite\FavoriteController;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -36,7 +37,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/user/update', [UserController::class, 'update'])->middleware('handelAuth'); // Refresh token
     Route::post('/user/changePassword', [UserController::class, 'changePassword'])->middleware('handelAuth'); // Refresh token
     Route::post('/user/updateImage', [UserController::class, 'updateImage'])->middleware('handelAuth'); // Refresh token
-
+    Route::get('/user/getMyPoints', [UserController::class, 'getMyPoints'])->middleware('handelAuth'); // Refresh token
+    Route::get('/user/AddPointsTest/{point}', [UserController::class, 'AddPointsTest'])->middleware('handelAuth'); // Refresh token
 });
 Route::get('/course', [ViewCourse::class, 'index']);
 Route::get('/course/{id}', [ViewCourse::class, 'show']);
@@ -55,6 +57,12 @@ Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])->middle
 //rate
 Route::get('/rating/{id}', [RatingController::class, 'index'])->middleware('handelAuth');;
 Route::post('/rating', [RatingController::class, 'store'])->middleware('handelAuth');;
+// instructor rating
+Route::get('/instructorRating/{id}', [InstructorRatingController::class, 'index'])->middleware('handelAuth');
+Route::post('/instructorRating/{id}', [InstructorRatingController::class, 'store'])->middleware('handelAuth');
+Route::post('/instructorRating/update/{id}', [InstructorRatingController::class, 'update'])->middleware('handelAuth');
+Route::delete('/instructorRating/{id}', [InstructorRatingController::class, 'destroy'])->middleware('handelAuth');
+
 // MARK:- DashBoard
 // Category Routes
 Route::post('/categories', [CategoryController::class, 'store']);

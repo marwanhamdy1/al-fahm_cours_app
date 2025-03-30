@@ -176,7 +176,7 @@ class EnrolledCourseController extends Controller
         $userId = $user->id;
         $queryUserId = $request->has('child_id') ? $request->child_id : $userId;
         // Skip the check if the user is a super_admin or admin
-        if (in_array($user->role, ['super_admin', 'admin'])) {
+        if (in_array($user->role, ['super_admin', 'admin', 'Admin'])) {
             return $queryUserId;
         }
 
