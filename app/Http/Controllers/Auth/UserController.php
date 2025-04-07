@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Traits\ImageUploadTrait;
 use App\Http\Resources\PointHistoryResources;
 use Illuminate\Support\Facades\Validator;
-
+use Exception;
 class UserController extends Controller
 {
     use ImageUploadTrait;
@@ -79,9 +79,17 @@ class UserController extends Controller
             return ResponseHelper::error("Failed to update image: " . $e->getMessage(), 500);
         }
     }
-    public function getMyPoints(){
+    public function getMyPoints(Request $request){
+        try{
+        $userId = $this->checkChildAndPermission($request);
+        $pointUser = User::find($userId);
         $point = PointHistory::where('user_id', auth()->user()->id)->get();
-        return ResponseHelper::success("success", PointHistoryResources::collection($point));
+        return ResponseHelper::success("success", ["data"=>PointHistoryResources::collection($point) , "total_points"=>$pointUser->points]);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return ResponseHelper::error("User not found", 404);
+    } catch (Exception $e) {
+        return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
+    }
     }
     public function AddPointsTest($point){
         // Create a new PointHistory record
@@ -100,5 +108,20 @@ class UserController extends Controller
 
         return ResponseHelper::success("success", new PointHistoryResources($pointHistory));
     }
+    private function checkChildAndPermission($request) {
+        $user = auth()->user();
+        $userId = $user->id;
+        $queryUserId = $request->has('child_id') ? $request->child_id : $userId;
+        // Skip the check if the user is a super_admin or admin
+        if (in_array($user->role, ['super_admin', 'admin', 'Admin'])) {
+            return $queryUserId;
+        }
 
+        if ($request->has('child_id') && !$user->children()->where('id', $queryUserId)->exists()) {
+            throw new Exception("ليس لديك صلاحية لتسجيل هذا الطفل", 403);
+        }
+
+        return $queryUserId;
+
+    }
 }

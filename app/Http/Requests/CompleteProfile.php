@@ -33,6 +33,9 @@ class CompleteProfile extends FormRequest
             'child_type'    => 'nullable|string|in:male,female', // Add other roles if needed
             'identity_id'   => 'required|string|max:255', // Only required for specific roles
             'neighborhood'  => 'nullable|string|max:255',
+            'username'      => 'required|string|unique:users,username|max:255', // Ensure unique username
+            'color'         => "required|string|max:255",
+            'image'         => 'required|string|max:255',
             'date_of_birth' => 'required|date',
         ];
     }

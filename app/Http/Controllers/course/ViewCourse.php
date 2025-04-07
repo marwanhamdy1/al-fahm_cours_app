@@ -67,6 +67,9 @@ class ViewCourse extends Controller
     public function departmentAndSessions($id)
 {
     try {
+         if (!auth()->check()) {
+            return ResponseHelper::error("Unauthenticated", 401);
+        }
         $attendedSessionIds = UserCourseSession::where('user_id', auth()->user()->id)
             ->pluck('course_session_id')
             ->toArray();
