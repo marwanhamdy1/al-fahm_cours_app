@@ -17,11 +17,18 @@ class UserController extends Controller
 {
     use ImageUploadTrait;
     public function update(UserUpdateRequest $request){
-    $user = auth()->user(); // Get the authenticated user
+        try{
+    $userID = $this->checkChildAndPermission($request);
+    $user =User::find($userID); // Get the authenticated user
 
     $user->update($request->validated()); // Update only validated fields
 
     return ResponseHelper::success("User information updated successfully", $user);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return ResponseHelper::error("User not found", 404);
+    } catch (Exception $e) {
+        return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
+    }
     }
     public function changePassword(Request $request){
         $user = auth()->user(); // Get authenticated user
@@ -56,7 +63,7 @@ class UserController extends Controller
     public function updateImage(Request $request){
         // Manually validate to catch validation errors
         $validator = Validator::make($request->all(), [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Limit to 2MB and specific formats
+            'image' => 'required|string', // Limit to 2MB and specific formats
         ]);
 
         if ($validator->fails()) {
@@ -67,11 +74,11 @@ class UserController extends Controller
             $user = auth()->user();
 
             // Save the image (Assuming `saveImage` is a function for storing images)
-            $image = $this->saveImage($request->file('image'));
+            // $image = $this->saveImage($request->file('image'));
 
             // Update the user's image
             $user->update([
-                'image' => $image,
+                'image' => $request->image,
             ]);
 
             return ResponseHelper::success("Image updated successfully", $user);
@@ -83,7 +90,7 @@ class UserController extends Controller
         try{
         $userId = $this->checkChildAndPermission($request);
         $pointUser = User::find($userId);
-        $point = PointHistory::where('user_id', auth()->user()->id)->get();
+        $point = PointHistory::where('user_id', $userId)->get();
         return ResponseHelper::success("success", ["data"=>PointHistoryResources::collection($point) , "total_points"=>$pointUser->points]);
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
         return ResponseHelper::error("User not found", 404);

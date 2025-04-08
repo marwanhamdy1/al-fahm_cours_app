@@ -19,6 +19,7 @@ class PointHistoryResources extends JsonResource
             'points' => $this->points,
             'is_gain' => $this->points < 0 ? 0 : 1, // If negative, 0; otherwise, 1
             'description' => $this->description,
+            'create_at' => $this->created_at,
             // 'created_at' => $this->created_at->format('Y-m-d H:i:s') ?? null,
         ];
     }
