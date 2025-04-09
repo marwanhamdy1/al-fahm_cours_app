@@ -11,10 +11,12 @@ use App\Http\Controllers\Api\InstructorController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\course\EnrolledCourseController;
 use App\Http\Controllers\course\RatingController;
 use App\Http\Controllers\course\InstructorRatingController;
 use App\Http\Controllers\favorite\FavoriteController;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
     Route::get('/image', [AuthController::class, 'image']); // Verify or create a user with phone number
@@ -62,6 +64,9 @@ Route::get('/instructorRating/{id}', [InstructorRatingController::class, 'index'
 Route::post('/instructorRating/{id}', [InstructorRatingController::class, 'store'])->middleware('handelAuth');
 Route::post('/instructorRating/update/{id}', [InstructorRatingController::class, 'update'])->middleware('handelAuth');
 Route::delete('/instructorRating/{id}', [InstructorRatingController::class, 'destroy'])->middleware('handelAuth');
+
+//Notifications
+Route::get('/notifications', [NotificationController::class, 'index'])->middleware('handelAuth');
 
 // MARK:- DashBoard
 // Category Routes

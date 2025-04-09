@@ -45,8 +45,8 @@ class ViewCourse extends Controller
         }
         public function show($id){
             try{
-                 $data = Course::find($id)->with(['instructor','category'])->get();
-                return ResponseHelper::success("success",  CourseResource::collection($data));
+                $data = Course::with(['instructor', 'category'])->find($id);
+                return ResponseHelper::success("success",  new CourseResource($data));
                 } catch (Exception $e) {
                     return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
                 }
