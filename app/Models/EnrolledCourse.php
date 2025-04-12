@@ -19,6 +19,7 @@ class EnrolledCourse extends Model
         'amount_paid',
         'remaining_amount',
         'payment_status',
+        'is_event'
     ];
 
 

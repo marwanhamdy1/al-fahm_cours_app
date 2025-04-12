@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('course_id'); // الكورس
             $table->unsignedBigInteger('assigned_by')->nullable(); // المستخدم الذي قام بالتسجيل (إذا كان ولي أمر)
             $table->enum('status', ['on_basket','pending', 'approved'])->default('on_basket'); // حالة التسجيل
+            $table->boolean('is_event', )->default(0); // حالة التسجيل
             $table->decimal('amount_paid', 10, 2)->default(0.00); // المبلغ المدفوع
             $table->decimal('remaining_amount', 10, 2)->default(0.00); // المبلغ المتبقي
             $table->enum('payment_status', ['unpaid', 'partially_paid', 'paid'])->default('unpaid'); // حالة الدفع

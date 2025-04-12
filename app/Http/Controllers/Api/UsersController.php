@@ -16,7 +16,7 @@ class UsersController extends Controller
         return ResponseHelper::success("success",UsersInfoForDashBoardResource::collection($users , "child"));
     }
     public function getParents(){
-        $users = User::with(['enrolledCourses.course'])->where("role", "parent")->get();
+        $users = User::with(['enrolledCourses.course'])->withCount('children')->where("role", "parent")->get();
         return ResponseHelper::success("success",UsersInfoForDashBoardResource::collection($users ,"parent"));
     }
    public function getChildrenParent($id)
@@ -28,7 +28,6 @@ class UsersController extends Controller
         }])->where('id', $id)
           ->where('role', 'parent') // Ensure the ID belongs to a parent
           ->first();
-
         if (!$parent) {
             return ResponseHelper::error("Parent not found", 404);
         }

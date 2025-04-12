@@ -33,6 +33,7 @@ return new class extends Migration
             $table->boolean('active')->default(false); // Total sessions
             $table->enum('type',['offline','online'])->default('offline'); // Total sessions
             $table->string('tags',500)->nullable(); // Total sessions
+            $table->enum('item_type', ['course', 'event'])->default('course');
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');

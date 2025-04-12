@@ -15,6 +15,35 @@ use Illuminate\Support\Facades\DB;
 class ViewCourse extends Controller
 {
 
+
+    public function indexEvents(Request $request){
+        // DB::enableQueryLog();
+        try{
+                 $query = Course::with(['instructor', 'category'])->where('item_type', 'event');
+
+                if ($request->has('search')) {
+                    if($this->detectLanguage($request->input('search')) == 'he'){
+                        $search = $request->input('search');
+                        $query->where("title_he", 'LIKE', "%{$search}%")
+                        ->orWhere("description_he", 'LIKE', "%{$search}%");
+                    }else{
+                        $search = $request->input('search');
+                        $query->where("title", 'LIKE', "%{$search}%")
+                        ->orWhere("description", 'LIKE', "%{$search}%");
+                    }
+                }
+
+                $data = $query->get();
+                // $queries = DB::getQueryLog();
+                // $queryCount = count($queries);
+
+                return ResponseHelper::success("success", CourseResource::collection($data));
+            } catch (Exception $e) {
+                return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
+            }
+        }
+
+
     public function index(Request $request)
         {
             try {

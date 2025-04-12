@@ -3,9 +3,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Instructor;
+use App\Models\Course;
+use App\Models\InstructorRating;
 use Illuminate\Http\Request;
 use App\Traits\ImageUploadTrait;
 use App\Helpers\ResponseHelper;
+use App\Http\Resources\CourseResource;
+use App\Http\Resources\InstructorRatingResources;
 
 class InstructorController extends Controller
 {
@@ -71,5 +75,13 @@ class InstructorController extends Controller
     {
         $instructor->delete();
         return response()->json(null, 204);
+    }
+    public function instructorCourses($id){
+        $courses= Course::with(['instructor', 'category'])->where("instructor_id" , $id)->get();
+        return ResponseHelper::success('success', CourseResource::collection($courses), 200);
+    }
+    public function instructorRating($id){
+        $rates = InstructorRating::with('user')->where('instructor_id', $id)->get();
+        return ResponseHelper::success("success", InstructorRatingResources::collection($rates));
     }
 }

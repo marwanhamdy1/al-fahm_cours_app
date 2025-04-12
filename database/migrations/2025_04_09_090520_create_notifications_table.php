@@ -19,7 +19,6 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->nullable(); // optional: if notification belongs to a user
             $table->boolean('is_read')->default(false);
             $table->timestamps();
-
             // optional foreign key
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

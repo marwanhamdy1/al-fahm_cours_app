@@ -33,7 +33,8 @@ class EnrolledCourseController extends Controller
             EnrolledCourse::create([
                 "user_id"          => $queryUserId,
                 "course_id"        => $request->course_id,
-                "remaining_amount" => $course->price
+                "remaining_amount" => $course->price,
+                'is_event'=> $course->item_type =="course" ? 0:1
             ]);
 
             return ResponseHelper::success("تم التسجيل بنجاح");
@@ -72,7 +73,7 @@ class EnrolledCourseController extends Controller
         $queryUserId = $this->checkChildAndPermission($request);
 
         // 1. Get all enrolled courses in the basket
-        $enrolledCourses = EnrolledCourse::where('user_id', $queryUserId)
+        $enrolledCourses = EnrolledCourse::where("is_event",0)->where('user_id', $queryUserId)
             ->where("status", "on_basket")
             ->with('course') // Eager load the course relationship (if defined)
             ->get();
@@ -89,7 +90,7 @@ class EnrolledCourseController extends Controller
         }
 
         // 3. Update all matching records to "pending"
-        $updatedCount = EnrolledCourse::where('user_id', $queryUserId)
+        $updatedCount = EnrolledCourse::where("is_event",0)->where('user_id', $queryUserId)
             ->where("status", "on_basket")
             ->update(['status' => "pending"]);
 
@@ -128,7 +129,7 @@ class EnrolledCourseController extends Controller
         $statuses = $request->input('statuses', []); // Array of statuses (e.g., ['pending', 'approved'])
 
         // Start building the query
-        $query = EnrolledCourse::where(function($q) use ($queryUserId) {
+        $query = EnrolledCourse::where("is_event",0)->where(function($q) use ($queryUserId) {
             $q->where('assigned_by', $queryUserId)
               ->orWhere("user_id", $queryUserId);
         });

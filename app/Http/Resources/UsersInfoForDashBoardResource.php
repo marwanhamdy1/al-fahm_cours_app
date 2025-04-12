@@ -44,6 +44,7 @@ class UsersInfoForDashBoardResource extends JsonResource
         'mother_identity_id'=> $this->mother_identity_id,
         'points' => $this->points,
         'first_enrolled_course' => $titleFirstEnrollment,
+        'children_count' => $this->children_count,
         ];
     }
 }

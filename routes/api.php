@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\course\EnrolledCourseController;
 use App\Http\Controllers\course\RatingController;
 use App\Http\Controllers\course\InstructorRatingController;
+use App\Http\Controllers\Event\EventsController;
 use App\Http\Controllers\favorite\FavoriteController;
 use App\Models\Notification;
 use App\Models\User;
@@ -43,6 +44,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/user/AddPointsTest/{point}', [UserController::class, 'AddPointsTest'])->middleware('handelAuth'); // Refresh token
 });
 Route::get('/course', [ViewCourse::class, 'index']);
+Route::get('/events', [ViewCourse::class, 'indexEvents']);
 Route::get('/course/{id}', [ViewCourse::class, 'show']);
 Route::get('/course/category/{id}', [ViewCourse::class, 'indexByCategory']);
 Route::get('/departmentAndSessions/{id}', [ViewCourse::class, 'departmentAndSessions']);
@@ -67,7 +69,9 @@ Route::delete('/instructorRating/{id}', [InstructorRatingController::class, 'des
 
 //Notifications
 Route::get('/notifications', [NotificationController::class, 'index'])->middleware('handelAuth');
-
+//Events
+Route::post('/my-events', [EventsController::class, 'index'])->middleware('handelAuth'); // Refresh token;
+Route::get('/pay-my-events', [EventsController::class, 'payEventToApprove'])->middleware('handelAuth'); // Refresh token;
 // MARK:- DashBoard
 // Category Routes
 Route::post('/categories', [CategoryController::class, 'store']);
@@ -82,6 +86,8 @@ Route::get('/instructors', [InstructorController::class, 'index']);
 Route::get('/instructors/{instructor}', [InstructorController::class, 'show']);
 Route::post('/instructors/{instructor}', [InstructorController::class, 'update']);
 Route::delete('/instructors/{instructor}', [InstructorController::class, 'destroy']);
+Route::get('/instructorCourses/{id}', [InstructorController::class, 'instructorCourses']);
+Route::get('/instructorRating/{id}', [InstructorController::class, 'instructorRating']);
 
 // Department Routes
 Route::post('/departments', [DepartmentController::class, 'store']);

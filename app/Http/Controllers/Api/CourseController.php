@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreCourseRequest;
 use App\Traits\ImageUploadTrait;
 use App\Helpers\ResponseHelper;
+use App\Http\Resources\CourseResource;
 
 
 class CourseController extends Controller
@@ -14,7 +15,8 @@ class CourseController extends Controller
     use ImageUploadTrait;
     public function index()
     {
-        return ResponseHelper::success('success',Course::all(), 200);
+        $data =Course::with(['instructor', 'category'])->get();
+        return ResponseHelper::success('success',CourseResource::collection($data), 200);
     }
 
    public function store(StoreCourseRequest $request)
@@ -40,9 +42,10 @@ class CourseController extends Controller
     }
 }
 
-    public function show(Course $course)
+    public function show($id)
     {
-    return ResponseHelper::success('success',$course, 200);
+    $data =Course::with(['instructor', 'category'])->where('id', $id)->first();
+    return ResponseHelper::success('success',new CourseResource($data), 200);
     }
 
     public function update(Request $request, Course $course)

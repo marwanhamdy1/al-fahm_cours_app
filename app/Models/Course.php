@@ -30,7 +30,8 @@ class Course extends Model
         'active',
         'type',
         'rating_count',
-        'rating_sum'
+        'rating_sum',
+        'item_type'
     ];
 
     protected $dates = ['start_date', 'end_date'];
