@@ -13,6 +13,7 @@ use App\Http\Requests\GetMyCourseRequest;
 use Exception;
 use App\Http\Requests\AssignCourseRequest;
 use App\Http\Resources\EnrolledCourseResource;
+use App\Models\CourseSession;
 use App\Models\UserCourseSession;
 
 
@@ -143,12 +144,15 @@ class EnrolledCourseController extends Controller
 
         $data = $query->get();
 
-        $data->transform(function ($enrolledCourse) {
+        $data->transform(function ($enrolledCourse) use($queryUserId) {
             $course = $enrolledCourse->course;
             if ($course) {
-                $attendedSessions = UserCourseSession::where('user_id', auth()->user()->id)
-                    ->where('course_session_id', $course->id)
-                    ->count();
+                $attendedSessions = UserCourseSession::query()
+                ->where('user_id', $queryUserId)
+                ->whereHas('session', function ($query) use ($course) {
+                    $query->where('course_id', $course->id);
+                })
+                ->count();
 
                 // Avoid division by zero
                 $attendancePercentage = $course->session_count > 0

@@ -3,6 +3,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\EnrolledCourse;
+use App\Models\UserCourseSession;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCourseRequest;
 use App\Traits\ImageUploadTrait;
@@ -80,5 +82,38 @@ class CourseController extends Controller
     {
         $course->delete();
         return response()->json(null, 204);
+    }
+    public function usersCourses($courseId){
+        try {
+
+
+        // Start building the query
+        $query = EnrolledCourse::with(['user','assignedBy'])->where("course_id",0);
+
+        // Apply status filter if provided
+
+        $data = $query->get();
+
+        $data->transform(function ($enrolledCourse) use($courseId) {
+            $course = $enrolledCourse->course;
+            if ($course) {
+                $attendedSessions = UserCourseSession::where('user_id', $enrolledCourse->user_id)
+                    ->where('course_session_id', $courseId)
+                    ->count();
+
+                // Avoid division by zero
+                $attendancePercentage = $course->session_count > 0
+                    ? round(($attendedSessions / $course->session_count) * 100, 2)
+                    : 0;
+
+                $enrolledCourse->attendance_percentage = $attendancePercentage;
+            }
+            return $enrolledCourse;
+        });
+
+        return ResponseHelper::success("success", $data);
+    } catch (\Exception $e) {
+        return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
+    }
     }
 }

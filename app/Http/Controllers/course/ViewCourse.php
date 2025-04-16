@@ -16,27 +16,26 @@ class ViewCourse extends Controller
 {
 
 
-    public function indexEvents(Request $request){
-        // DB::enableQueryLog();
-        try{
-                 $query = Course::with(['instructor', 'category'])->where('item_type', 'event');
+    public function indexEvents(Request $request) {
+            try {
+                $query = Course::with(['instructor', 'category'])->where('item_type', 'event');
 
                 if ($request->has('search')) {
-                    if($this->detectLanguage($request->input('search')) == 'he'){
-                        $search = $request->input('search');
-                        $query->where("title_he", 'LIKE', "%{$search}%")
-                        ->orWhere("description_he", 'LIKE', "%{$search}%");
-                    }else{
-                        $search = $request->input('search');
-                        $query->where("title", 'LIKE', "%{$search}%")
-                        ->orWhere("description", 'LIKE', "%{$search}%");
-                    }
+                    $search = $request->input('search');
+                    $isHebrew = $this->detectLanguage($search) == 'he';
+
+                    $query->where(function($q) use ($search, $isHebrew) {
+                        if ($isHebrew) {
+                            $q->where("title_he", 'LIKE', "%{$search}%")
+                              ->orWhere("description_he", 'LIKE', "%{$search}%");
+                        } else {
+                            $q->where("title", 'LIKE', "%{$search}%")
+                              ->orWhere("description", 'LIKE', "%{$search}%");
+                        }
+                    });
                 }
 
                 $data = $query->get();
-                // $queries = DB::getQueryLog();
-                // $queryCount = count($queries);
-
                 return ResponseHelper::success("success", CourseResource::collection($data));
             } catch (Exception $e) {
                 return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
@@ -93,21 +92,23 @@ class ViewCourse extends Controller
                 return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
             }
         }
-    public function departmentAndSessions($id)
+    public function departmentAndSessions(Request $request, $id)
 {
     try {
-         if (!auth()->check()) {
+        if (!auth()->check()) {
             return ResponseHelper::error("Unauthenticated", 401);
         }
-        $attendedSessionIds = UserCourseSession::where('user_id', auth()->user()->id)
+
+        $userId = $this->checkChildAndPermission($request); // Use `$this->` to call private method
+
+        $attendedSessionIds = UserCourseSession::where('user_id', $userId)
             ->pluck('course_session_id')
             ->toArray();
 
         $departments = Department::where('course_id', $id)
-            ->with(['courseSessions'])
+            ->with('courseSessions')
             ->get();
 
-        // Manually format the response
         $formattedDepartments = $departments->map(function ($department) use ($attendedSessionIds) {
             return [
                 'id' => $department->id,
@@ -123,8 +124,8 @@ class ViewCourse extends Controller
             ];
         });
 
-        return ResponseHelper::success("success", $formattedDepartments
-        );
+        return ResponseHelper::success("success", $formattedDepartments);
+
     } catch (Exception $e) {
         return ResponseHelper::error("Something went wrong", 500, $e->getMessage());
     }
@@ -133,5 +134,21 @@ class ViewCourse extends Controller
         {
             return preg_match('/\p{Hebrew}/u', $text) ? 'he' : 'ar';
         }
+        private function checkChildAndPermission($request) {
+        $user = auth()->user();
+        $userId = $user->id;
+        $queryUserId = $request->has('child_id') ? $request->child_id : $userId;
+        // Skip the check if the user is a super_admin or admin
+        if (in_array($user->role, ['super_admin', 'admin', 'Admin'])) {
+            return $queryUserId;
+        }
+
+        if ($request->has('child_id') && !$user->children()->where('id', $queryUserId)->exists()) {
+            throw new Exception("ليس لديك صلاحية لتسجيل هذا الطفل", 403);
+        }
+
+        return $queryUserId;
+
+    }
 
 }

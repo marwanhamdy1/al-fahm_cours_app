@@ -39,6 +39,7 @@ class StoreCourseRequest extends FormRequest
             'category_id' => 'required|exists:categories,id',
             'instructor_id' => 'required|exists:instructors,id',
             'active' => 'required|in:0,1',
+            'item_type'=>'required|string',
         ];
     }
 

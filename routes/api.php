@@ -70,7 +70,7 @@ Route::delete('/instructorRating/{id}', [InstructorRatingController::class, 'des
 //Notifications
 Route::get('/notifications', [NotificationController::class, 'index'])->middleware('handelAuth');
 //Events
-Route::post('/my-events', [EventsController::class, 'index'])->middleware('handelAuth'); // Refresh token;
+Route::get('/my-events', [EventsController::class, 'index'])->middleware('handelAuth'); // Refresh token;
 Route::get('/pay-my-events', [EventsController::class, 'payEventToApprove'])->middleware('handelAuth'); // Refresh token;
 // MARK:- DashBoard
 // Category Routes
@@ -108,6 +108,7 @@ Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses/{course}', [CourseController::class, 'show']);
 Route::put('/courses/{course}', [CourseController::class, 'update']);
 Route::delete('/courses/{course}', [CourseController::class, 'destroy']);
+Route::get('/usersCourses/{course}', [CourseController::class, 'usersCourses']);
 //users
 Route::get('/users/info', [UsersController::class, 'getUsers']);
 Route::get('/users/info/parent', [UsersController::class, 'getParents']);
