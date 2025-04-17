@@ -83,14 +83,14 @@ class AuthController extends Controller
                 return ResponseHelper::error("Identity ID is required", 400);
             }
 
-            $getParent = User::where("identity_id", $data['identity_id'])->first();
+            $getParent = User::where("identity_id", $data['parent_identity_id'])->first();
 
             if (!$getParent) {
                 return ResponseHelper::error("Failed to complete profile: Identity ID not found", 404);
             }
 
             $data['parent_id'] = $getParent->id;
-            unset($data['identity_id']);
+            // unset($data['identity_id']);
         }
 
         // Update user profile
