@@ -18,6 +18,7 @@ class RatingCourseResource extends JsonResource
             'id' => $this->id,
             'rating' => $this->rating,
             'comment' => $this->comment,
+            'is_accept' => $this->is_accept,
             'user'=>[
                 "name"=> $this->user->first_name . " " . $this->user->last_name,
                 "image"=> asset('/storage/'.$this->user->image),

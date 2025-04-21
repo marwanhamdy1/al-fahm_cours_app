@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\CourseSessionController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OverViewController;
 use App\Http\Controllers\course\EnrolledCourseController;
 use App\Http\Controllers\course\RatingController;
 use App\Http\Controllers\course\InstructorRatingController;
@@ -74,47 +75,60 @@ Route::get('/my-events', [EventsController::class, 'index'])->middleware('handel
 Route::get('/pay-my-events', [EventsController::class, 'payEventToApprove'])->middleware('handelAuth'); // Refresh token;
 // MARK:- DashBoard
 // Category Routes
-Route::post('/categories', [CategoryController::class, 'store']);
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{category}', [CategoryController::class, 'show']);
-Route::post('/categories-update/{category}', [CategoryController::class, 'update']);
-Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+Route::post('/categories', [CategoryController::class, 'store'])->middleware('admin');
+Route::get('/categories', [CategoryController::class, 'index'])->middleware('moderator');;
+Route::get('/categories/{category}', [CategoryController::class, 'show'])->middleware('moderator');;
+Route::post('/categories-update/{category}', [CategoryController::class, 'update'])->middleware('admin');;
+Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->middleware('admin');;
 
 // Instructor Routes
-Route::post('/instructors', [InstructorController::class, 'store']);
-Route::get('/instructors', [InstructorController::class, 'index']);
-Route::get('/instructors/{instructor}', [InstructorController::class, 'show']);
-Route::post('/instructors/{instructor}', [InstructorController::class, 'update']);
-Route::delete('/instructors/{instructor}', [InstructorController::class, 'destroy']);
-Route::get('/instructorCourses/{id}', [InstructorController::class, 'instructorCourses']);
-Route::get('/instructorRating/{id}', [InstructorController::class, 'instructorRating']);
+Route::post('/instructors', [InstructorController::class, 'store'])->middleware('admin');
+Route::get('/instructors', [InstructorController::class, 'index'])->middleware('moderator');
+Route::get('/instructors/{instructor}', [InstructorController::class, 'show'])->middleware('moderator');
+Route::post('/instructors/{instructor}', [InstructorController::class, 'update'])->middleware('admin');
+Route::delete('/instructors/{instructor}', [InstructorController::class, 'destroy'])->middleware('admin');
+Route::get('/instructorCourses/{id}', [InstructorController::class, 'instructorCourses'])->middleware('moderator');
+Route::get('/instructorRating/{id}', [InstructorController::class, 'instructorRating'])->middleware('moderator');
+Route::get('/changeInstructorRatingStatusReview/{id}/{status}', [InstructorController::class, 'changeStatusReview'])->middleware('moderator');
 
 // Department Routes
-Route::post('/departments', [DepartmentController::class, 'store']);
-Route::get('/departments/{id}', [DepartmentController::class, 'index']);
-Route::post('/departments/{department}', [DepartmentController::class, 'update']);
-Route::delete('/departments/{department}', [DepartmentController::class, 'destroy']);
+Route::post('/departments', [DepartmentController::class, 'store'])->middleware('admin');
+Route::get('/departments/{id}', [DepartmentController::class, 'index'])->middleware('moderator');
+Route::post('/departments/{department}', [DepartmentController::class, 'update'])->middleware('admin');
+Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->middleware('admin');
 
 // Course Session Routes
-Route::post('/course-sessions', [CourseSessionController::class, 'store']);
-Route::get('/course-sessions', [CourseSessionController::class, 'index']);
-Route::get('/course-sessions/{courseSession}', [CourseSessionController::class, 'show']);
-Route::put('/course-sessions/{courseSession}', [CourseSessionController::class, 'update']);
-Route::delete('/course-sessions/{courseSession}', [CourseSessionController::class, 'destroy']);
+Route::post('/course-sessions', [CourseSessionController::class, 'store'])->middleware('admin');
+Route::get('/course-sessions', [CourseSessionController::class, 'index'])->middleware('moderator');
+Route::get('/course-sessions/{courseSession}', [CourseSessionController::class, 'show'])->middleware('moderator');
+Route::put('/course-sessions/{courseSession}', [CourseSessionController::class, 'update'])->middleware('admin');
+Route::delete('/course-sessions/{courseSession}', [CourseSessionController::class, 'destroy'])->middleware('admin');
 
 // Course Routes
-Route::post('/courses-add', [CourseController::class, 'store']);
-Route::get('/courses', [CourseController::class, 'index']);
-Route::get('/courses/{course}', [CourseController::class, 'show']);
-Route::put('/courses/{course}', [CourseController::class, 'update']);
-Route::delete('/courses/{course}', [CourseController::class, 'destroy']);
-Route::get('/usersCourses/{course}', [CourseController::class, 'usersCourses']);
+Route::post('/courses-add', [CourseController::class, 'store'])->middleware('admin');
+Route::get('/courses', [CourseController::class, 'index'])->middleware('moderator');
+Route::get('/courses/{course}', [CourseController::class, 'show'])->middleware('moderator');
+Route::post('/courses/{course}', [CourseController::class, 'update'])->middleware('admin');
+Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->middleware('admin');
+Route::get('/usersCourses/{course}', [CourseController::class, 'usersCourses'])->middleware('moderator');
+Route::get('/usersCoursesBySession/{course}/{sessionId}', [CourseController::class, 'usersCoursesBySession'])->middleware('moderator');
+Route::post('/makeAttendForUsers', [CourseController::class, 'makeAttendForUser'])->middleware('moderator');
+Route::get('/changeCourseStatus/{id}', [CourseController::class, 'changeCourseStatus'])->middleware('admin');
+Route::get('/getUsersEnrolledInCourse/{id}', [CourseController::class, 'getUsersEnrolledInCourse'])->middleware('moderator');
+Route::post('/makePaymentForUser', [CourseController::class, 'makePaymentForUser'])->middleware('moderator');
+Route::get('/allPayments', [CourseController::class, 'allPayments'])->middleware('admin');
+Route::get('/courseRating/{id}', [CourseController::class, 'courseRating'])->middleware('moderator');
+Route::get('/changeCourseRatingStatusReview/{id}/{status}', [CourseController::class, 'changeStatusReview'])->middleware('moderator');
 //users
-Route::get('/users/info', [UsersController::class, 'getUsers']);
-Route::get('/users/info/parent', [UsersController::class, 'getParents']);
-Route::get('/users/info/parent/{id}/children', [UsersController::class, 'getChildrenParent']);
-Route::post('/users/updateUserInfo/{id}', [UsersController::class, 'updateUserInfo']);
+Route::get('/users/info', [UsersController::class, 'getUsers'])->middleware('moderator');
+Route::get('/users/info/parent', [UsersController::class, 'getParents'])->middleware('moderator');
+Route::get('/users/info/parent/{id}/children', [UsersController::class, 'getChildrenParent'])->middleware('moderator');
+Route::post('/users/updateUserInfo/{id}', [UsersController::class, 'updateUserInfo'])->middleware('moderator');
 
+Route::get('/overview', [OverViewController::class, 'overview'])->middleware('moderator');
+Route::post('/createAdminOrModerator', [OverViewController::class, 'createAdminOrModerator'])->middleware('admin');
+Route::get('/getAllRole', [OverViewController::class, 'getAllRole'])->middleware('moderator');
+Route::get('/deleteRole/{id}', [OverViewController::class, 'deleteRole'])->middleware('admin');
 
 Route::get('/createAdmin', function () {
     $user = User::updateOrCreate(

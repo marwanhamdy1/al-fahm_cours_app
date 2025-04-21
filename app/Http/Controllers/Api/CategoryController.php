@@ -12,7 +12,7 @@ class CategoryController extends Controller
     use ImageUploadTrait;
     public function index()
     {
-        return ResponseHelper::success('success',Category::all(), 200);
+        return ResponseHelper::success('success',Category::withCount('courses')->get(), 200);
     }
 
     public function store(Request $request)

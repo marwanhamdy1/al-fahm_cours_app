@@ -45,6 +45,7 @@ class UsersInfoForDashBoardResource extends JsonResource
         'points' => $this->points,
         'first_enrolled_course' => $titleFirstEnrollment,
         'children_count' => $this->children_count,
+        'status'=> $this->status ==1 ?"active" : "disActive"
         ];
     }
 }

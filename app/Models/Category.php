@@ -20,5 +20,9 @@ class Category extends Model
     {
         return asset('storage/' . $this->image);
     }
+    public function courses()
+{
+    return $this->hasMany(Course::class);
+}
 
 }

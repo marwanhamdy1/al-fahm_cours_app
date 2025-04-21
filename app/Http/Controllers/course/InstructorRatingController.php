@@ -11,7 +11,8 @@ class InstructorRatingController extends Controller
 {
     //
     public function  index($id){
-        $rates = InstructorRating::where('instructor_id', $id)->get();
+        $rates = InstructorRating::where('instructor_id', $id)
+        ->where("is_accept",1)->get();
         return ResponseHelper::success("success", $rates);
     }
     public function store(Request $request, $id)

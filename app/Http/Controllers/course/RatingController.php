@@ -38,7 +38,7 @@ class RatingController extends Controller
     }
     public function index($id){
         try{
-        $rates = Rating::with('user')->where('course_id', $id)->get();
+        $rates = Rating::with('user')->where('course_id', $id)->where("is_accept",1)->get();
         return ResponseHelper::success("success", RatingCourseResource::collection($rates));
          } catch (\Exception $e) {
         // return response()->json(['error' => 'Failed to submit rating', 'details' => $e->getMessage()], 500);

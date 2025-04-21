@@ -142,6 +142,7 @@ class AuthController extends Controller
                 'child_type'    => $request->child_type,
                 "color"     => $request->color,
                 "date_of_birth"     => $request->date_of_birth,
+                "identity_id"     => $request->identity_id,
                 "image"     => $request->image,
                 "role"          => "child",
             ]);
@@ -240,7 +241,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         // Check if user exists and is an admin/super_admin
-        if (!$user || !in_array($user->role, ['admin', 'super_admin'])) {
+        if (!$user || !in_array($user->role, ['admin', 'super_admin','moderator'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

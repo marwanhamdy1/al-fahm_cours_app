@@ -10,11 +10,28 @@ use App\Http\Requests\StoreCourseRequest;
 use App\Traits\ImageUploadTrait;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\UserCourseResources;
+use App\Http\Resources\UsersEnrolledInCourseResources;
+use App\Http\Resources\PaymentsResource;
+use App\Http\Resources\RatingCourseResource;
+use App\Models\Rating;
+use Illuminate\Support\Facades\Validator;
 
 
 class CourseController extends Controller
 {
     use ImageUploadTrait;
+
+    public function changeCourseStatus($id)
+{
+    $course = Course::findOrFail($id); // Get the actual model or fail
+
+    $course->active = $course->active == 0 ? 1 : 0;
+    $course->save(); // Save the updated status
+
+    return ResponseHelper::success('success', new CourseResource($course), 200);
+}
+
     public function index()
     {
         $data =Course::with(['instructor', 'category'])->get();
@@ -85,35 +102,173 @@ class CourseController extends Controller
     }
     public function usersCourses($courseId){
         try {
-
-
         // Start building the query
-        $query = EnrolledCourse::with(['user','assignedBy'])->where("course_id",0);
+        $query = EnrolledCourse::with(relations: ['user','assignedBy'])->where("status","approved",)->where("course_id",$courseId)->get();
 
-        // Apply status filter if provided
-
-        $data = $query->get();
-
-        $data->transform(function ($enrolledCourse) use($courseId) {
-            $course = $enrolledCourse->course;
-            if ($course) {
-                $attendedSessions = UserCourseSession::where('user_id', $enrolledCourse->user_id)
-                    ->where('course_session_id', $courseId)
-                    ->count();
-
-                // Avoid division by zero
-                $attendancePercentage = $course->session_count > 0
-                    ? round(($attendedSessions / $course->session_count) * 100, 2)
-                    : 0;
-
-                $enrolledCourse->attendance_percentage = $attendancePercentage;
-            }
-            return $enrolledCourse;
-        });
-
-        return ResponseHelper::success("success", $data);
+        return ResponseHelper::success("success", UserCourseResources::collection($query) );
     } catch (\Exception $e) {
         return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
     }
     }
+    public function usersCoursesBySession($courseId, $courseSessionId)
+    {
+        try {
+            // Get all approved enrolled users in this course with related user data
+            $enrolledUsers = EnrolledCourse::with(['user', 'assignedBy'])
+                ->where('status', 'approved')
+                ->where('course_id', $courseId)
+                ->get();
+
+            // Get all user IDs who attended the specific session
+            $attendedUserIds = UserCourseSession::where('course_session_id', $courseSessionId)
+                ->pluck('user_id')
+                ->toArray();
+
+            // Add attended_session field to each enrolled user
+            $enrolledUsers->transform(function ($item) use ($attendedUserIds) {
+                $item->attended_session = in_array($item->user_id, $attendedUserIds) ? 1 : 0;
+                return $item;
+            });
+
+            return ResponseHelper::success("success", UserCourseResources::collection($enrolledUsers));
+        } catch (\Exception $e) {
+            return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
+        }
+    }
+    public function makeAttendForUser(Request $request)
+    {
+        // Step 1: Validate input
+    $validator = Validator::make($request->only(['course_session_id','user_ids']), [
+    'course_session_id' => 'required|exists:course_sessions,id',
+    'user_ids' => 'required|array|min:1',
+    'user_ids.*' => 'exists:users,id',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+        $courseSessionId = $request->course_session_id;
+        $userIds = $request->user_ids;
+
+        $created = [];
+
+        foreach ($userIds as $userId) {
+            // Step 2: Prevent duplicate attendance
+            $exists = UserCourseSession::where('user_id', $userId)
+                ->where('course_session_id', $courseSessionId)
+                ->exists();
+
+            if (!$exists) {
+                $created[] = UserCourseSession::create([
+                    'user_id' => $userId,
+                    'course_session_id' => $courseSessionId,
+                ]);
+            }
+        }
+
+        // Step 3: Return response
+        return response()->json([
+            'status' => true,
+            'message' => 'Attendance marked successfully.',
+            'created_count' => count($created),
+            'created_records' => $created, // optional
+        ]);
+    }
+    public function getUsersEnrolledInCourse($courseId){
+          try {
+        // Start building the query
+        $query = EnrolledCourse::with(relations: ['user','assignedBy'])->where("course_id",$courseId)
+        ->whereIn("status",["approved","pending"])->get();
+
+        return ResponseHelper::success("success", UsersEnrolledInCourseResources::collection($query) );
+    } catch (\Exception $e) {
+        return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
+    }
+    }
+    public function makePaymentForUser(Request $request)
+    {
+        $amount = (float) $request->amount;
+        $enrollCourse = EnrolledCourse::findOrFail($request->id);
+
+        $currentPaid = (float) $enrollCourse->amount_paid;
+        $remaining = (float) $enrollCourse->remaining_amount;
+
+        $newPaid = $currentPaid + $amount;
+
+        if ($newPaid >= $remaining) {
+            // Full payment completed or overpaid
+            $enrollCourse->update([
+                'amount_paid' => $remaining,
+                'remaining_amount' => 0,
+                'status' => 'approved',
+                'payment_status' => 'paid',
+            ]);
+        } else {
+            // Partial payment
+            $enrollCourse->update([
+                'amount_paid' => $newPaid,
+                'remaining_amount' => $remaining - $amount,
+                'status' => 'pending',
+                'payment_status' => 'partially_paid',
+            ]);
+        }
+
+        return ResponseHelper::success('تم تحديث الدفع بنجاح');
+    }
+    public function allPayments(){
+        try{
+        $query = EnrolledCourse::with(relations: ['user','assignedBy','course'])
+        ->whereIn("payment_status",["partially_paid","paid"])->get();
+        return ResponseHelper::success("success", PaymentsResource::collection($query) );
+        } catch (\Exception $e) {
+        return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
+    }
+    }
+    public function courseRating($id){
+        try{
+        $rates = Rating::with('user')->where('course_id', $id)->get();
+        return ResponseHelper::success("success", RatingCourseResource::collection($rates));
+         } catch (\Exception $e) {
+        // return response()->json(['error' => 'Failed to submit rating', 'details' => $e->getMessage()], 500);
+        return ResponseHelper::error("Failed to submit rating", 400,$e->getMessage());
+    }
+    }
+     public function changeStatusReview($id, $status)
+{
+    // Validate the status input
+    if (!in_array($status, [0, 1])) {
+        return ResponseHelper::error("Invalid status value", 422);
+    }
+
+    // Find the rating or fail
+    $rating = Rating::find($id);
+    if (!$rating) {
+        return ResponseHelper::error("Rating not found", 404);
+    }
+
+    // Add authorization check (example using middleware, but could also be here)
+    // if (!auth()->user()->can('moderate-ratings')) {
+    //     return ResponseHelper::error("Unauthorized", 403);
+    // }
+
+    try {
+        $rating->is_accept = $status;
+        $rating->save(); // Using save() instead of update() to trigger model events
+
+        // Optional: Log the action
+        // activity()->log(auth()->user()->name." changed rating status to {$status}");
+
+        return ResponseHelper::success("Status updated successfully", $rating);
+
+    } catch (\Exception $e) {
+        // Log the error if needed
+        // \Log::error("Error updating rating status: ".$e->getMessage());
+
+        return ResponseHelper::error("Failed to update status", 500);
+    }
+}
 }

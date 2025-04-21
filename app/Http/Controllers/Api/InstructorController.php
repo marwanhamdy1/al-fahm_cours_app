@@ -84,4 +84,38 @@ class InstructorController extends Controller
         $rates = InstructorRating::with('user')->where('instructor_id', $id)->get();
         return ResponseHelper::success("success", InstructorRatingResources::collection($rates));
     }
+    public function changeStatusReview($id, $status)
+{
+    // Validate the status input
+    if (!in_array($status, [0, 1])) {
+        return ResponseHelper::error("Invalid status value", 422);
+    }
+
+    // Find the rating or fail
+    $rating = InstructorRating::find($id);
+    if (!$rating) {
+        return ResponseHelper::error("Rating not found", 404);
+    }
+
+    // Add authorization check (example using middleware, but could also be here)
+    // if (!auth()->user()->can('moderate-ratings')) {
+    //     return ResponseHelper::error("Unauthorized", 403);
+    // }
+
+    try {
+        $rating->is_accept = $status;
+        $rating->save(); // Using save() instead of update() to trigger model events
+
+        // Optional: Log the action
+        // activity()->log(auth()->user()->name." changed rating status to {$status}");
+
+        return ResponseHelper::success("Status updated successfully", $rating);
+
+    } catch (\Exception $e) {
+        // Log the error if needed
+        // \Log::error("Error updating rating status: ".$e->getMessage());
+
+        return ResponseHelper::error("Failed to update status", 500);
+    }
+}
 }

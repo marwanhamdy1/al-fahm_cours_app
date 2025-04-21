@@ -23,7 +23,7 @@ return new class extends Migration
         $table->string('image')->nullable();
         $table->string('color')->nullable();
         $table->string('verify_code')->default("1234");
-        $table->enum('role', ['super_admin','admin','parent', 'child', 'individual'])->nullable();
+        $table->enum('role', ['super_admin','admin','parent', 'child', 'individual','moderator'])->nullable();
         $table->date('date_of_birth')->nullable();
         $table->string('school_name')->nullable();
         $table->string('grade_name')->nullable();
@@ -32,7 +32,7 @@ return new class extends Migration
         $table->unsignedBigInteger('parent_id')->nullable();
         $table->enum('parent_type', ['father', 'mother'])->nullable();
         $table->enum('child_type', ['male', 'female'])->nullable();
-        $table->tinyInteger('status',)->default(0);
+        $table->tinyInteger('status',)->default(1);
         $table->string('mother_name')->nullable();
         $table->string('mother_identity_id')->nullable();
         $table->float('points')->nullable();
