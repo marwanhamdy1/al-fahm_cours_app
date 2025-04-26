@@ -18,6 +18,8 @@ use App\Http\Controllers\course\RatingController;
 use App\Http\Controllers\course\InstructorRatingController;
 use App\Http\Controllers\Event\EventsController;
 use App\Http\Controllers\favorite\FavoriteController;
+use App\Http\Controllers\Instructors\InstructorsAuthController;
+use App\Http\Controllers\Instructors\InstructorsController;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -76,7 +78,7 @@ Route::get('/pay-my-events', [EventsController::class, 'payEventToApprove'])->mi
 // MARK:- DashBoard
 // Category Routes
 Route::post('/categories', [CategoryController::class, 'store'])->middleware('admin');
-Route::get('/categories', [CategoryController::class, 'index'])->middleware('moderator');;
+Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->middleware('moderator');;
 Route::post('/categories-update/{category}', [CategoryController::class, 'update'])->middleware('admin');;
 Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->middleware('admin');;
@@ -124,17 +126,24 @@ Route::get('/users/info', [UsersController::class, 'getUsers'])->middleware('mod
 Route::get('/users/info/parent', [UsersController::class, 'getParents'])->middleware('moderator');
 Route::get('/users/info/parent/{id}/children', [UsersController::class, 'getChildrenParent'])->middleware('moderator');
 Route::post('/users/updateUserInfo/{id}', [UsersController::class, 'updateUserInfo'])->middleware('moderator');
+Route::get('/users/changeStatusUser/{id}', [UsersController::class, 'changeStatusUser'])->middleware('admin');
+Route::get('/users/deleteUser/{id}', [UsersController::class, 'deleteUser'])->middleware('admin');
+Route::post('/users/addParent', [UsersController::class, 'addParent'])->middleware('admin');
+Route::post('/users/addChild/{parentID}', [UsersController::class, 'addChild'])->middleware('admin');
+
+Route::get('/sendNotification', [NotificationController::class, 'sendNotification'])->middleware('moderator');
 
 Route::get('/overview', [OverViewController::class, 'overview'])->middleware('moderator');
 Route::post('/createAdminOrModerator', [OverViewController::class, 'createAdminOrModerator'])->middleware('admin');
 Route::get('/getAllRole', [OverViewController::class, 'getAllRole'])->middleware('moderator');
 Route::get('/deleteRole/{id}', [OverViewController::class, 'deleteRole'])->middleware('admin');
+Route::get('/logsLogin', [OverViewController::class, 'logsLogin'])->middleware('moderator');
 
 Route::get('/createAdmin', function () {
     $user = User::updateOrCreate(
         ['email' => 'admin@bemo.com'], // Check if an account with this email exists
         [
-            'first_name' => 'Bemo ',
+            'first_name' => 'Bemo',
             'last_name' => ' Admin',
             'password' => Hash::make('bemomaroo'),
             'role' => 'admin', // Change to 'super_admin' if needed
@@ -145,4 +154,34 @@ Route::get('/createAdmin', function () {
         'message' => 'Admin account created successfully',
         'user' => $user
     ]);
+});
+// instructors
+Route::prefix('instructors')->group(function () {
+    // Authentication routes
+    Route::post('login', [InstructorsAuthController::class, 'login']);
+
+    // Add other public routes here if needed
+});
+// Public routes (no auth required)
+Route::prefix('instructors')->group(function () {
+    // Authentication routes
+    Route::post('login', [InstructorsAuthController::class, 'login']);
+
+    // Add other public routes here if needed
+});
+
+// Protected routes (require instructor auth)
+Route::prefix('instructors')->middleware(['auth:instructor', 'instructor'])->group(function () {
+    // Auth-related routes
+    Route::post('logout', [InstructorsAuthController::class, 'logout']);
+    Route::post('refresh', [InstructorsAuthController::class, 'refresh']);
+    Route::get('me', [InstructorsAuthController::class, 'me']);
+
+    // Instructor-specific routes
+    Route::get('courses', [InstructorsController::class, 'myCourse']);
+    Route::get('courses/{courseId}/users', [InstructorsController::class, 'usersInCourse']);
+    Route::get('courses/{courseId}/{courseSessionId}', [InstructorsController::class, 'usersCoursesBySession']);
+    Route::post('courses/attendance', [InstructorsController::class, 'makeAttendForUser']);
+
+    // Add other protected routes here
 });

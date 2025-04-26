@@ -26,9 +26,10 @@ class AddChildRequest extends FormRequest
     {
         return [
             'first_name'    => 'required|string|max:255',
-            'last_name'     => 'required|string|max:255',
+            'last_name'     => 'nullable|string|max:255',
             'username'      => 'required|string|unique:users,username|max:255', // Ensure unique username
             'password'      => 'required|string|min:6|confirmed', // Uses password confirmation
+            'email'         => 'nullable|email|unique:users,email,' ,
             'phone_number'  => 'nullable|string|regex:/^\+?[0-9]{7,15}$/|unique:users,phone_number',
             'child_type'    => 'required|string|in:male,female', // Add other roles if needed
             'identity_id'   => 'required|string|max:255', // Only required for specific roles

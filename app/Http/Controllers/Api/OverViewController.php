@@ -6,11 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\Instructor;
+use App\Models\LoginLog;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\EnrolledCourse;
-
+use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -121,5 +122,11 @@ public function deleteRole($id){
         return response()->json(['message' => 'User not found'], 404);
     }
 }
+public function logsLogin(){
+    $logs  = LoginLog::latest()->get();
 
+    return response()->json([
+        'logs' => $logs,
+    ]);
+}
 }

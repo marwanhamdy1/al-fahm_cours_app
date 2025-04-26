@@ -15,6 +15,7 @@ use App\Http\Resources\UsersEnrolledInCourseResources;
 use App\Http\Resources\PaymentsResource;
 use App\Http\Resources\RatingCourseResource;
 use App\Models\Rating;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -34,7 +35,7 @@ class CourseController extends Controller
 
     public function index()
     {
-        $data =Course::with(['instructor', 'category'])->get();
+        $data =Course::with(['instructor', 'category'])->latest()->get();
         return ResponseHelper::success('success',CourseResource::collection($data), 200);
     }
 
@@ -196,9 +197,9 @@ class CourseController extends Controller
 
         $currentPaid = (float) $enrollCourse->amount_paid;
         $remaining = (float) $enrollCourse->remaining_amount;
-
+        $point = $enrollCourse->course->earnings_point;
+        $user = User::find($enrollCourse->user_id);
         $newPaid = $currentPaid + $amount;
-
         if ($newPaid >= $remaining) {
             // Full payment completed or overpaid
             $enrollCourse->update([
@@ -207,12 +208,16 @@ class CourseController extends Controller
                 'status' => 'approved',
                 'payment_status' => 'paid',
             ]);
+
+       // Give points only when full payment is completed
+        $user->points += $point;
+        $user->save();
         } else {
             // Partial payment
             $enrollCourse->update([
                 'amount_paid' => $newPaid,
                 'remaining_amount' => $remaining - $amount,
-                'status' => 'pending',
+                'status' => 'approved',
                 'payment_status' => 'partially_paid',
             ]);
         }

@@ -10,14 +10,21 @@ use App\Traits\ImageUploadTrait;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\InstructorRatingResources;
+use Illuminate\Support\Facades\Hash;
 
 class InstructorController extends Controller
 {
     use ImageUploadTrait;
     public function index()
-    {
-        return ResponseHelper::success('success',Instructor::all(), 200);
-    }
+{
+    $instructors = Instructor::latest()->get()->map(function ($instructor) {
+        $instructor->image = asset('storage/' . $instructor->image);
+        return $instructor; // ✅ This should be $instructor, not $instructors
+    });
+
+    return ResponseHelper::success('success', $instructors, 200);
+}
+
 
     public function store(Request $request)
     {
@@ -29,8 +36,15 @@ class InstructorController extends Controller
             'date_of_birth' => 'nullable|date',
             'bio' => 'nullable|string',
             'info' => 'nullable|string',
+            'email' => 'nullable|email|unique:instructors,email',
+            "phone_number"=>"nullable|unique:instructors,phone_number",
+           'password'      => 'nullable|string|min:6', // يفضل تحديد حد أدنى للأمان
         ]);
           // Check if a new image is uploaded and process it
+           // Hash the password if provided
+        if (!empty($validData['password'])) {
+            $validData['password'] = Hash::make($validData['password']);
+        }
     if ($request->hasFile('image')) {
         $validData['image'] = $this->saveImage($request->image);
     }
@@ -59,7 +73,14 @@ class InstructorController extends Controller
             'date_of_birth' => 'sometimes|date',
             'bio' => 'sometimes|string',
             'info' => 'nullable|string',
+            'email' => 'sometimes|email|unique:instructors,email',
+            'password' => 'sometimes|string|min:6',
+            "phone_number" => "sometimes|string"
         ]);
+         // Hash password if it's present
+        if (array_key_exists('password', $validData)) {
+            $validData['password'] = Hash::make($validData['password']);
+        }
          if ($request->hasFile('image')) {
         $validData['image'] = $this->saveImage($request->image);
     }

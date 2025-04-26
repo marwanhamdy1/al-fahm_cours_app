@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class UsersInfoForDashBoardResource extends JsonResource
 {
@@ -30,8 +31,10 @@ class UsersInfoForDashBoardResource extends JsonResource
         'identity_id'=> $this->identity_id,
         'email' => $this->email,
         'phone_number'=> $this->phone_number,
-        'image'=> asset('/storage/'.$this->image),
-        'color' => $this->color,
+'image' => Str::startsWith($this->image, ['http://', 'https://']) 
+    ? $this->image 
+    : asset('storage/' . $this->image),
+    'color' => $this->color,
         'date_of_birth'=> $this->date_of_birth,
         'school_name' => $this->school_name,
         'grade_name' => $this->grade_name,

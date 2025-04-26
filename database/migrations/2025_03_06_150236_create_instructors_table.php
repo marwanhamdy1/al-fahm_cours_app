@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('bio',5000)->nullable();
             $table->text('info')->nullable();
             $table->enum ('status', ['active', 'disActive']);
+            $table->string('email')->unique()->nullable();
+            $table->string('password')->nullable();
+            $table->string('phone_number')->unique()->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

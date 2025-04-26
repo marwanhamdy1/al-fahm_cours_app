@@ -23,6 +23,7 @@ class CourseResource extends JsonResource
             'price' => $this->price,
             'earnings_point' => $this->earnings_point,
             'address' => $this->address,
+             'addres_he' => $this->addres_he,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'max_people' => $this->max_people,

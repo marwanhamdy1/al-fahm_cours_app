@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CompleteProfile;
 use App\Http\Requests\PhoneNumberRequest;
 use App\Http\Requests\AddChildRequest;
+use App\Models\LoginLog;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\ImageUploadTrait;
 use Illuminate\Support\Facades\Validator;
@@ -50,9 +51,17 @@ class AuthController extends Controller
         $user = User::where('phone_number',  $request->phone_number)
         ->where( 'verify_code', $request->verify_code)->first();
         if(!$user){
+            $this->storeLoginLog($request, 'failed');
         return ResponseHelper::error( "verify code does not match", 500);
         }
+        // Save FCM token if sent
+        if ($request->has('fcm_token')) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
+        }
         $token = Auth::login($user);
+          // Store successful login attempt
+        $this->storeLoginLog($request, 'success');
       // If the user has a first name and last name, return success
         if ($user->first_name && $user->last_name) {
         return ResponseHelper::success("success", ['user'=>$user,'token' => $token ]);
@@ -134,7 +143,7 @@ class AuthController extends Controller
             // $image = $this->saveImage($request->image);
             $child = User::create([
                 "first_name"    => $request->first_name,
-                "last_name"     => $request->last_name,
+                "last_name"     => $request->last_name ?? $request->first_name,
                 "username"     => $request->username,
                 "password"      => Hash::make($request->password),
                 "phone_number"  => $request->phone_number,
@@ -160,6 +169,7 @@ class AuthController extends Controller
         $request->validate([
             'username' => 'required|string|exists:users,username',
             'password'     => 'required|string|min:6',
+            'fcm_token'     => 'nullable|string',
         ]);
 
         // Find user by phone number
@@ -167,12 +177,17 @@ class AuthController extends Controller
 
         // Check if the password is correct
         if (!$user || !Hash::check($request->password, $user->password)) {
+            $this->storeLoginLog($request, 'failed');
             return ResponseHelper::error("Invalid username or password", 401);
         }
-
+          // Save FCM token if sent
+        if ($request->has('fcm_token')) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
+        }
         // Generate a new token for the user
         $token = Auth::login($user);
-
+$this->storeLoginLog($request, 'success');
         return ResponseHelper::success("Login successful", [
             'user'  => $user,
             'token' => $token
@@ -249,7 +264,6 @@ class AuthController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
-
         // Generate JWT token
         $token = JWTAuth::fromUser($user);
 
@@ -269,5 +283,24 @@ class AuthController extends Controller
     ];
 
     return ResponseHelper::success("success", ['data' => $images]);
+}
+public function storeLoginLog(Request $request, $status = 'failed')
+{
+    try {
+        // Access 'logs' data from the request
+        $data = $request->input('logs');  // You can access it like this
+        if (!$data) {
+          return ;
+        }
+
+        // Optionally, you can check if all necessary fields are present in the 'logs'
+        $data['status'] = $status;  // Add the status to the log data
+
+        // Create a new log entry
+        $log = LoginLog::create($data);
+        return $log;
+    } catch (Exception $e) {
+        // return ResponseHelper::error("Failed to store login log", 500, $e->getMessage());
+    }
 }
 }

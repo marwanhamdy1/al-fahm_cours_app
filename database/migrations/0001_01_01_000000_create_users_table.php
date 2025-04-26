@@ -23,7 +23,7 @@ return new class extends Migration
         $table->string('image')->nullable();
         $table->string('color')->nullable();
         $table->string('verify_code')->default("1234");
-        $table->enum('role', ['super_admin','admin','parent', 'child', 'individual','moderator'])->nullable();
+        $table->enum('role', ['super_admin','admin','parent', 'child', 'individual'])->nullable();
         $table->date('date_of_birth')->nullable();
         $table->string('school_name')->nullable();
         $table->string('grade_name')->nullable();
@@ -37,8 +37,10 @@ return new class extends Migration
         $table->string('mother_identity_id')->nullable();
         $table->float('points')->nullable();
         $table->float('balance')->nullable();
+        $table->string('fcm_token',1000)->nullable();
         $table->foreign('parent_id')->references('id')->on('users')->onDelete('cascade');
         $table->timestamps();
+        $table->softDeletes();
 });
 
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Models\EnrolledCourse;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
@@ -43,5 +45,8 @@ class NotificationController extends Controller
             return response()->json(['error' => 'Failed to create notification', 'message' => $e->getMessage()], 500);
         }
     }
-
+    public function sendNotification($enrollCourseID){
+        $enrollCourseID = EnrolledCourse::find($enrollCourseID);
+        return ResponseHelper::success("notification send");
+    }
 }

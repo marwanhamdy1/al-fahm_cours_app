@@ -43,11 +43,12 @@ class EnrolledCourseController extends Controller
             return ResponseHelper::error("حدث خطأ: " . $e->getMessage(), 500);
         }
     }
-        public function destroy($id)
+        public function destroy(Request $request,$id)
     {
         try {
+            $queryUserId = $this->checkChildAndPermission($request);
             $course = EnrolledCourse::findOrFail($id); // Throws ModelNotFoundException if not found
-            if($course->status != "on_basket" || $course->user_id != auth()->user()->id){
+            if(!in_array($course->status, ["on_basket", "pending"])  || $course->user_id != $queryUserId ){
             return ResponseHelper::error("لم يتم العثور على دورة", 404);
             }
             $course->delete();

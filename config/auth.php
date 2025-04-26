@@ -44,6 +44,10 @@ return [
         'driver' => 'jwt',
         'provider' => 'users',
     ],
+    'instructor' => [
+            'driver' => 'jwt',
+            'provider' => 'instructors',
+        ],
     ],
 
     /*
@@ -67,6 +71,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'instructors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Instructor::class,
         ],
 
         // 'users' => [
@@ -98,6 +106,12 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'instructors' => [
+            'provider' => 'instructors',
+            'table' => 'password_reset_tokens', // you can use same table or create a new one
             'expire' => 60,
             'throttle' => 60,
         ],

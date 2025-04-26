@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Instructor extends Model
+class Instructor extends Model implements JWTSubject
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
      protected $fillable = [
         'first_name',
         'last_name',
@@ -15,8 +17,13 @@ class Instructor extends Model
         'date_of_birth',
         'bio',
         'info',
+        'email',
+        'password' ,
+        'phone_number'
     ];
-
+    protected $hidden = [
+        'password',
+    ];
     protected $dates = ['date_of_birth'];
 
     // Accessor: Get Full Name
@@ -29,5 +36,20 @@ class Instructor extends Model
     public function courses()
     {
         return $this->hasMany(Course::class);
+    }
+    /**
+     * JWT Identifier.
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * JWT Custom Claims.
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }
