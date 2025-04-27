@@ -155,15 +155,9 @@ Route::get('/createAdmin', function () {
         'user' => $user
     ]);
 });
-// instructors
-Route::prefix('instructors')->group(function () {
-    // Authentication routes
-    Route::post('login', [InstructorsAuthController::class, 'login']);
 
-    // Add other public routes here if needed
-});
 // Public routes (no auth required)
-Route::prefix('instructors')->group(function () {
+Route::prefix('instructor')->group(function () {
     // Authentication routes
     Route::post('login', [InstructorsAuthController::class, 'login']);
 
@@ -171,7 +165,7 @@ Route::prefix('instructors')->group(function () {
 });
 
 // Protected routes (require instructor auth)
-Route::prefix('instructors')->middleware(['auth:instructor', 'instructor'])->group(function () {
+Route::prefix('instructor')->group(function () {
     // Auth-related routes
     Route::post('logout', [InstructorsAuthController::class, 'logout']);
     Route::post('refresh', [InstructorsAuthController::class, 'refresh']);
