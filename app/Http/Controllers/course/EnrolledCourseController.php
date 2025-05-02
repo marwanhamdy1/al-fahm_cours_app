@@ -48,9 +48,17 @@ class EnrolledCourseController extends Controller
         try {
             $queryUserId = $this->checkChildAndPermission($request);
             $course = EnrolledCourse::findOrFail($id); // Throws ModelNotFoundException if not found
-            if(!in_array($course->status, ["on_basket", "pending"])  || $course->user_id != $queryUserId ){
-            return ResponseHelper::error("لم يتم العثور على دورة", 404);
+            // if($course->is_event){
+
+            // }
+            if(!$course->is_event){
+                 if(!in_array($course->status, ["on_basket", "pending"]) || $course->user_id != $queryUserId){
+             return ResponseHelper::error("لم يتم العثور على دورة", 404);
             }
+            }
+
+
+            
             $course->delete();
 
             return ResponseHelper::success("تم حذف الدورة");

@@ -131,7 +131,7 @@ Route::get('/users/deleteUser/{id}', [UsersController::class, 'deleteUser'])->mi
 Route::post('/users/addParent', [UsersController::class, 'addParent'])->middleware('admin');
 Route::post('/users/addChild/{parentID}', [UsersController::class, 'addChild'])->middleware('admin');
 
-Route::get('/sendNotification', [NotificationController::class, 'sendNotification'])->middleware('moderator');
+Route::get('/sendNotification/{id}', [NotificationController::class, 'sendNotification'])->middleware('moderator');
 
 Route::get('/overview', [OverViewController::class, 'overview'])->middleware('moderator');
 Route::post('/createAdminOrModerator', [OverViewController::class, 'createAdminOrModerator'])->middleware('admin');
@@ -173,6 +173,8 @@ Route::prefix('instructor')->group(function () {
 
     // Instructor-specific routes
     Route::get('courses', [InstructorsController::class, 'myCourse']);
+    Route::get('courses/{id}', [InstructorsController::class, 'myCourseShow']);
+    Route::get('courses/{id}/departmentAndSessions', [InstructorsController::class, 'myCourseDepartmentAndSessions']);
     Route::get('courses/{courseId}/users', [InstructorsController::class, 'usersInCourse']);
     Route::get('courses/{courseId}/{courseSessionId}', [InstructorsController::class, 'usersCoursesBySession']);
     Route::post('courses/attendance', [InstructorsController::class, 'makeAttendForUser']);

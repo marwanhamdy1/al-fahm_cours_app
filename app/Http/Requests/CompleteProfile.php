@@ -26,7 +26,7 @@ class CompleteProfile extends FormRequest
          return [
             'first_name'    => 'required|string|max:255',
             'last_name'     => 'required|string|max:255',
-            'email'         => 'required|email|unique:users,email,' ,
+            'email'         => 'nullable|email|unique:users,email,' ,
             'password'      => 'nullable|string|min:6|confirmed', // Uses password confirmation
             'role'          => 'required|string|in:parent,individual,child', // Add other roles if needed
             'parent_type'   => 'nullable|string|in:father,mother', // Add other roles if needed
