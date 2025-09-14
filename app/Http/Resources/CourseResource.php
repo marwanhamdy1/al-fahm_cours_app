@@ -35,7 +35,7 @@ class CourseResource extends JsonResource
             'active' => $this->active,
             'type' => $this->type,
             'category' => new CategoryResources($this->category),
-            'rate_avg' => $this->rating_count == 0 ? 0 :  $this->rating_count / $this->rating_sum
+           'rate_avg' => ($this->rating_count == 0 || $this->rating_sum == 0) ? 0 : $this->rating_sum / $this->rating_count
         ];
     }
 }
