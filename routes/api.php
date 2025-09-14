@@ -119,6 +119,7 @@ Route::get('/changeCourseStatus/{id}', [CourseController::class, 'changeCourseSt
 Route::get('/getUsersEnrolledInCourse/{id}', [CourseController::class, 'getUsersEnrolledInCourse'])->middleware('moderator');
 Route::post('/makePaymentForUser', [CourseController::class, 'makePaymentForUser'])->middleware('moderator');
 Route::get('/allPayments', [CourseController::class, 'allPayments'])->middleware('admin');
+Route::post('/addUserToCourse', [CourseController::class, 'addUserToCourse'])->middleware('admin');
 Route::get('/courseRating/{id}', [CourseController::class, 'courseRating'])->middleware('moderator');
 Route::get('/changeCourseRatingStatusReview/{id}/{status}', [CourseController::class, 'changeStatusReview'])->middleware('moderator');
 //users

@@ -7,6 +7,7 @@ use App\Models\EnrolledCourse;
 use App\Models\UserCourseSession;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCourseRequest;
+use App\Http\Requests\AddUserToCourseRequest;
 use App\Traits\ImageUploadTrait;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\CourseResource;
@@ -223,6 +224,68 @@ class CourseController extends Controller
         }
 
         return ResponseHelper::success('تم تحديث الدفع بنجاح');
+    }
+    // add user to course from dashboard
+
+    public function addUserToCourse(AddUserToCourseRequest $request)
+    {
+        try {
+            // Get the course and user
+            $course = Course::findOrFail($request->course_id);
+            $user = User::findOrFail($request->user_id);
+
+            // Check if user is already enrolled in this course
+            $existingEnrollment = EnrolledCourse::where('user_id', $user->id)
+                ->where('course_id', $request->course_id)
+                ->first();
+
+            if ($existingEnrollment) {
+                return ResponseHelper::error("User is already enrolled in this course", 400);
+            }
+
+            // Check if course is active
+            if (!$course->active) {
+                return ResponseHelper::error("Course is not active", 400);
+            }
+
+            // Calculate remaining amount
+            $amountPaid = $request->amount_paid ?? 0;
+            $remainingAmount = $course->price - $amountPaid;
+
+            // Determine payment status
+            $paymentStatus = $request->payment_status ?? 'unpaid';
+            if ($amountPaid > 0 && $amountPaid < $course->price) {
+                $paymentStatus = 'partially_paid';
+            } elseif ($amountPaid >= $course->price) {
+                $paymentStatus = 'paid';
+                $remainingAmount = 0;
+            }
+
+            // Create enrollment
+            $enrollment = EnrolledCourse::create([
+                'user_id' => $user->id,
+                'course_id' => $course->id,
+                'assigned_by' => $request->assigned_by ?? null,
+                'amount_paid' => $amountPaid,
+                'remaining_amount' => $remainingAmount,
+                'payment_status' => $paymentStatus,
+                'status' => $paymentStatus === 'paid' ? 'approved' : 'pending',
+                'is_event' => $course->item_type == "course" ? 0 : 1
+            ]);
+
+            // Add points if fully paid
+            if ($paymentStatus === 'paid' && $course->earnings_point > 0) {
+                $user->points += $course->earnings_point;
+                $user->save();
+            }
+
+            return ResponseHelper::success("User successfully enrolled in course", new UserCourseResources($enrollment->load(['user', 'assignedBy'])));
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return ResponseHelper::error("Course or User not found", 404);
+        } catch (\Exception $e) {
+            return ResponseHelper::error("Failed to enroll user: " . $e->getMessage(), 500);
+        }
     }
     public function allPayments(){
         try{
